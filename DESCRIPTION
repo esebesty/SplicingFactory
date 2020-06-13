@@ -1,0 +1,25 @@
+Package: SplicingFactory
+Type: Package
+Title: Splicing Diversity Analysis for Transcriptome Data
+biocViews: Transcriptomics, RNASeq, DifferentialSplicing, AlternativeSplicing, TranscriptomeVariant
+Version: 0.99.0
+Authors@R: c(
+    person("Peter A.", "Szikora", role = c("aut", "cre"), email = "peter.andras.szikora@gmail.com"),
+    person("Endre", "Sebestyen", role = "aut", email = "sebestyen.endre@med.semmelweis-univ.hu", comment = c(ORCID = "0000-0001-5470-2161")))
+Description: The SplicingFactory R package uses transcript-level expression
+    values to analyze splicing diversity based on various statistical measures,
+    like Shannon entropy or the Gini index. These measures can quantify
+    transcript isoform diversity within samples or between conditions.
+    Additionally, the package analyzes the isoform diversity data, looking for
+    significant changes between conditions.
+RoxygenNote: 7.1.0
+Imports: methods, stats, Biobase, ggplot2, tidyr
+Suggests:
+    testthat,
+    knitr,
+    rmarkdown
+Depends: R (>= 4.0)
+License: GPL-3 + file LICENSE
+Encoding: UTF-8
+LazyData: true
+VignetteBuilder: knitr

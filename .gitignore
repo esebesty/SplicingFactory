@@ -1,0 +1,11 @@
+*.Rproj
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+inst/doc
+vignettes/*.html
+vignettes/*.pdf
+vignettes/*.R
+*.swp
+.~lock*

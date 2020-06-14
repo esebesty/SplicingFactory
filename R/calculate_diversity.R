@@ -86,8 +86,7 @@ calculate_diversity <- function(x, genes, method = "laplace", norm = TRUE, tpm =
       message("Note: calculate_diversity methods are only applicable if your
               DGEList contains transcript-level expression data.")
       if (tpm == TRUE) {
-        message("asd")
-        message("Note: tpm as a logical argument is only interpreted in case of
+      message("Note: tpm as a logical argument is only interpreted in case of
               tximport lists.")
       }
     } else {

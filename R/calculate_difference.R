@@ -81,8 +81,9 @@ calculate_difference <- function(x, samples, control, method = "mean", test = "w
             message("Note: The 'randomizations' argument is an option for label shuffling,
               it won't have any effect on the Wilcoxon rank sum test.", 
                 call. = FALSE)
-        if (length(grep(unique(samples)[1], samples)) < 3 | length(grep(unique(samples)[2], samples)) < 3 | length(samples) < 
-            8) 
+        if (length(grep(unique(samples)[1], samples)) < 3 | 
+            length(grep(unique(samples)[2], samples)) < 3 | 
+            length(samples) < 8) 
             warning("Low sample size. Wilcoxon rank sum test requires at least
       three samples in a given category and at least 8 samples overall for a
               theoretical p-value smaller than 0.05.", 

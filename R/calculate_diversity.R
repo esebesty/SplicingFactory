@@ -18,7 +18,8 @@
 #'   \code{FALSE}, read counts will be used.
 #' @return Gene-level splicing diversity values in a \code{data.frame}, where
 #'   each row is a gene and each column is a sample from the input data.
-#' @import Biobase methods
+#' @import methods
+#' @importFrom SummarizedExperiment assays assay
 #' @export
 #' @details The function is intended to process transcript-level expression data
 #' from RNA-seq or similar datasets.
@@ -62,8 +63,9 @@
 #' gene <- c(rep('Gene1', 3), rep('Gene2', 2), rep('Gene3', 3), rep('Gene4', 2))
 #'
 #' calculate_diversity(x, gene, method = 'laplace', norm = TRUE)
-calculate_diversity <- function(x, genes, method = "laplace", norm = TRUE, tpm = FALSE) {
-  if (!(class(x)[1] %in% c("matrix", "data.frame", "list", "DGEList", "ExpressionSet")))
+calculate_diversity <- function(x, genes = NULL, method = "laplace", norm = TRUE, tpm = FALSE) {
+  if (!(class(x)[1] %in% c("matrix", "data.frame", "list", "DGEList", "ExpressionSet",
+                           "RangedSummarizedExperiment", "SummarizedExperiment")))
     stop("Input data type is not supported! Please use `?calculate_diversity`
 \t to see the possible arguments and details.")
   if (is(x, "data.frame")) {
@@ -93,18 +95,35 @@ calculate_diversity <- function(x, genes, method = "laplace", norm = TRUE, tpm =
       stop("The package cannot find any expression data in your input.", call. = FALSE)
     }
   }
-  if (is(x, "ExpressionSet")) {
-    x <- Biobase::exprs(x)
-    message("Note: calculate_diversity methods are only applicable if your
-            ExpressionSet contains transcript-level expression data.")
+  if (class(x)[1] %in% c("RangedSummarizedExperiment", "SummarizedExperiment")) {
+    if (length(SummarizedExperiment::assays(x)) == 1) {
+      x <- as.matrix(SummarizedExperiment::assay(x))
+    }
+    else if (length(SummarizedExperiment::assays(x)) > 1 & 
+        !"counts" %in% names(SummarizedExperiment::assays(x))) {
+      stop("There are multiple assays in your SummarizedExperiment object, 
+           none of them is called `counts`.")
+    }
+    else if (length(SummarizedExperiment::assays(x)) > 1) {
+      x <- as.matrix(SummarizedExperiment::assays(x)$counts)
+    }
+    if (is.null(genes)) {
+      genes <- rownames(x)
+      rownames(x) <- NULL
+      if (is.null(genes)) {
+        stop("Please construct a valid gene set for your SummarizedExperiment.", 
+             call. = FALSE)
+      }
+    }
   }
   if (!is.numeric(x))
-    stop("Input data  must be numeric!")
+    stop("Input data  must be numeric!", call. = FALSE)
   if (any(is.na(x)))
     stop("The data contains NA as expression values. NAs are not allowed in the
          input.", call. = FALSE)
-  if (nrow(x) != length(genes))
+  if (nrow(x) != length(genes)) {
     stop("The number of rows is not equal to the given gene set.", call. = FALSE)
+  }
   if (!(method %in% c("naive", "laplace", "gini", "simpson", "invsimpson"))) {
     stop("Invalid method. Please use `?calculate_diversity` to see the possible
          arguments and details.",

@@ -2,8 +2,9 @@
 
 export(calculate_difference)
 export(calculate_diversity)
-import(Biobase)
 import(ggplot2)
 import(methods)
 import(stats)
 import(tidyr)
+importFrom(SummarizedExperiment,assay)
+importFrom(SummarizedExperiment,assays)

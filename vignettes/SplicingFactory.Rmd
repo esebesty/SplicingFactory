@@ -76,6 +76,10 @@ want to specify the 'tpm' argument. As the default option is FALSE, the raw read
 counts will be extracted from your input data. Set it to TRUE if you want to use
 TPM values.
 
+Another optional argument is 'SE_assay', which is useful if you are planning to 
+analyze a SummarizedExperiment input, containing multiple assays. 'SE_assay' is
+a numeric value, specifying the assay to be analyzed.
+
 ## Splicing diversity analysis
 
 ### Example dataset

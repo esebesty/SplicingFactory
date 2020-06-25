@@ -9,7 +9,8 @@ calculate_diversity(
   genes = NULL,
   method = "laplace",
   norm = TRUE,
-  tpm = FALSE
+  tpm = FALSE,
+  SE_assay = 1
 )
 }
 \arguments{
@@ -30,9 +31,13 @@ of transcripts for each gene. The normalized entropy values are always
 between 0 and 1. If \code{FALSE}, genes cannot be compared to each other,
 due to possibly different maximum entropy values.}
 
-\item{tpm}{In the case of tximport data, TPM values or raw read counts can
+\item{tpm}{In the case of tximport input, TPM values or raw read counts can
 serve as an input. If \code{TRUE}, TPM values will be used, if
 \code{FALSE}, read counts will be used.}
+
+\item{SE_assay}{Numeric value. In case of multiple assays in a 
+SummarizedExperiment, this argument is able to pick the right assay from 
+your experiment.}
 }
 \value{
 Gene-level splicing diversity values in a \code{data.frame}, where

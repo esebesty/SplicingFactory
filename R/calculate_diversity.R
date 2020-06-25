@@ -13,9 +13,12 @@
 #'   of transcripts for each gene. The normalized entropy values are always
 #'   between 0 and 1. If \code{FALSE}, genes cannot be compared to each other,
 #'   due to possibly different maximum entropy values.
-#' @param tpm In the case of tximport data, TPM values or raw read counts can
+#' @param tpm In the case of tximport input, TPM values or raw read counts can
 #'   serve as an input. If \code{TRUE}, TPM values will be used, if
 #'   \code{FALSE}, read counts will be used.
+#' @param SE_assay Numeric value. In case of multiple assays in a 
+#'    SummarizedExperiment, this argument is able to pick the right assay from 
+#'    your experiment.
 #' @return Gene-level splicing diversity values in a \code{data.frame}, where
 #'   each row is a gene and each column is a sample from the input data.
 #' @import methods
@@ -63,8 +66,9 @@
 #' gene <- c(rep('Gene1', 3), rep('Gene2', 2), rep('Gene3', 3), rep('Gene4', 2))
 #'
 #' calculate_diversity(x, gene, method = 'laplace', norm = TRUE)
-calculate_diversity <- function(x, genes = NULL, method = "laplace", norm = TRUE, tpm = FALSE) {
-  if (!(class(x)[1] %in% c("matrix", "data.frame", "list", "DGEList", "ExpressionSet",
+calculate_diversity <- function(x, genes = NULL, method = "laplace", norm = TRUE, tpm = FALSE,
+                                SE_assay = 1) {
+  if (!(class(x)[1] %in% c("matrix", "data.frame", "list", "DGEList",
                            "RangedSummarizedExperiment", "SummarizedExperiment")))
     stop("Input data type is not supported! Please use `?calculate_diversity`
 \t to see the possible arguments and details.")
@@ -96,16 +100,11 @@ calculate_diversity <- function(x, genes = NULL, method = "laplace", norm = TRUE
     }
   }
   if (class(x)[1] %in% c("RangedSummarizedExperiment", "SummarizedExperiment")) {
-    if (length(SummarizedExperiment::assays(x)) == 1) {
-      x <- as.matrix(SummarizedExperiment::assay(x))
+    if (!is.numeric(SE_assay) | length(SummarizedExperiment::assays(x)) < SE_assay) {
+      stop("Please give a valid number to pick an assay from your data.", call. = FALSE)
     }
-    else if (length(SummarizedExperiment::assays(x)) > 1 & 
-        !"counts" %in% names(SummarizedExperiment::assays(x))) {
-      stop("There are multiple assays in your SummarizedExperiment object, 
-           none of them is called `counts`.")
-    }
-    else if (length(SummarizedExperiment::assays(x)) > 1) {
-      x <- as.matrix(SummarizedExperiment::assays(x)$counts)
+    else if (is.numeric(SE_assay)) {
+      x <- as.matrix(SummarizedExperiment::assays(x)[[SE_assay]])
     }
     if (is.null(genes)) {
       genes <- rownames(x)
@@ -132,7 +131,7 @@ calculate_diversity <- function(x, genes = NULL, method = "laplace", norm = TRUE
   if (method == "gini" && norm == FALSE) {
     message("Gini coefficient ranges between 0 (complete equality) and 1 (complete
     inequality). The 'norm' logical argument does not have any effect on the
-            calculation.")
+            calculation.", call. = FALSE)
   }
   if (method == "simpson" && norm == FALSE) {
     message("Simpson index ranges between 0 to 1. The 'norm' logical argument
@@ -141,7 +140,7 @@ calculate_diversity <- function(x, genes = NULL, method = "laplace", norm = TRUE
   }
   if (method == "invsimpson" && norm == FALSE) {
     message("Inverse Simpson index does not use the 'norm' argument, and it won't
-            have any effect on the calculation.")
+            have any effect on the calculation.", call. = FALSE)
   }
   result <- calculate_method(x, genes, method, norm)
   return(result)

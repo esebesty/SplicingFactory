@@ -1,3 +1,10 @@
+# SplicingFactory 0.99.3
+
+* SummarizedExperiment input type updated in calculate_diversity, 
+  new argument: SE_assay.
+  
+* Documentation, vignette updated.
+
 # SplicingFactory 0.99.2
 
 * SummarizedExperiment input type instead of ExpressionSet.

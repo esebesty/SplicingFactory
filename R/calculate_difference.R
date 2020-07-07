@@ -44,57 +44,57 @@
 #' # sample categories
 #' samples <- c(rep('Healthy', 4), rep('Pathogenic', 4))
 #'
-#' # To calculate the difference of splicing diversity changes between the 'Healthy'
-#' # and 'Pathogenic' condition together with the significance values, using mean
-#' # and Wilcoxon rank sum test, use:
+#' # To calculate the difference of splicing diversity changes between the
+#' # 'Healthy' and 'Pathogenic' condition together with the significance values,
+#' # using mean and Wilcoxon rank sum test, use:
 #' calculate_difference(x, samples, control = 'Healthy', method = 'mean', test = 'wilcoxon')
-calculate_difference <- function(x, samples, control, method = "mean", test = "wilcoxon", randomizations = 100, 
+calculate_difference <- function(x, samples, control, method = "mean", test = "wilcoxon", randomizations = 100,
     ...) {
-    if (!is(x, "data.frame")) 
+    if (!is(x, "data.frame"))
         stop("Input data type is not supported! Please use `?calculate_difference`
-         to see the possible arguments and details.", 
+         to see the possible arguments and details.",
             call. = FALSE)
-    if (ncol(x) - 1 != length(samples)) 
+    if (ncol(x) - 1 != length(samples))
         stop("The number of columns in the data.frame is not equal to the number of
-         samples defined in the samples argument.", 
+         samples defined in the samples argument.",
             call. = FALSE)
-    if (length(levels(as.factor(samples))) > 2) 
+    if (length(levels(as.factor(samples))) > 2)
         stop("The number of conditions are higher than two. Please use exactly two
-         different sample conditions, e.g. healthy and pathogenic.", 
+         different sample conditions, e.g. healthy and pathogenic.",
             call. = FALSE)
-    if (length(levels(as.factor(samples))) < 2) 
+    if (length(levels(as.factor(samples))) < 2)
         stop("The number of conditions are smaller than two. Please use exactly two
-         different sample conditions, e.g. healthy and pathogenic.", 
+         different sample conditions, e.g. healthy and pathogenic.",
             call. = FALSE)
-    if (!(control %in% samples)) 
+    if (!(control %in% samples))
         stop("This control sample type cannot be found in your samples.")
-    if (!(method %in% c("mean", "median"))) 
+    if (!(method %in% c("mean", "median")))
         stop("Invalid method. Please use `?calculate_diversity` to see the possible
-         arguments and details.", 
+         arguments and details.",
             call. = FALSE)
-    if (!(test %in% c("wilcoxon", "shuffle"))) 
+    if (!(test %in% c("wilcoxon", "shuffle")))
         stop("Invalid test method. Please use `?calculate_diversity` to see the
-         possible arguments and details.", 
+         possible arguments and details.",
             call. = FALSE)
     if (test == "wilcoxon") {
-        if (randomizations != 100) 
+        if (randomizations != 100)
             message("Note: The 'randomizations' argument is an option for label shuffling,
-              it won't have any effect on the Wilcoxon rank sum test.", 
+              it won't have any effect on the Wilcoxon rank sum test.",
                 call. = FALSE)
-        if (length(grep(unique(samples)[1], samples)) < 3 | 
-            length(grep(unique(samples)[2], samples)) < 3 | 
-            length(samples) < 8) 
+        if (length(grep(unique(samples)[1], samples)) < 3 |
+            length(grep(unique(samples)[2], samples)) < 3 |
+            length(samples) < 8)
             warning("Low sample size. Wilcoxon rank sum test requires at least
       three samples in a given category and at least 8 samples overall for a
-              theoretical p-value smaller than 0.05.", 
+              theoretical p-value smaller than 0.05.",
                 call. = FALSE)
     }
     if (test == "shuffle") {
-        if (length(samples) <= 5) 
+        if (length(samples) <= 5)
             warning("Low sample size, not enough samples for label shuffling!", call. = FALSE)
-        if (length(samples) > 5 & length(samples) < 10) 
+        if (length(samples) > 5 & length(samples) < 10)
             warning("Low sample size, label shuffling might not give informative and
-              correct results.", 
+              correct results.",
                 call. = FALSE)
     }
     x$cond_1 <- apply(x[grep(unique(samples)[1], samples) + 1], 1, function(x) sum(!is.na(x)))

@@ -70,8 +70,8 @@ x <- data.frame(Genes = letters[seq_len(10)], matrix(runif(80), ncol = 8))
 # sample categories
 samples <- c(rep('Healthy', 4), rep('Pathogenic', 4))
 
-# To calculate the difference of splicing diversity changes between the 'Healthy'
-# and 'Pathogenic' condition together with the significance values, using mean
-# and Wilcoxon rank sum test, use:
+# To calculate the difference of splicing diversity changes between the
+# 'Healthy' and 'Pathogenic' condition together with the significance values,
+# using mean and Wilcoxon rank sum test, use:
 calculate_difference(x, samples, control = 'Healthy', method = 'mean', test = 'wilcoxon')
 }

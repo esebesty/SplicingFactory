@@ -37,7 +37,7 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-```	
+```
 
 # Standard workflow
 
@@ -84,26 +84,26 @@ a numeric value, specifying the assay to be analyzed.
 
 ### Example dataset
 
-The package contains an example dataset called `example_dataset`. The data was
-downloaded from The Cancer Genome Atlas on 12th of April, 2020. It contains
-transcript level read counts for 300 pre-selected genes of 40 patients with
-Luminal A type breast cancer (primary tumor and solid normal samples).
+The package contains an example dataset called `tcga_brca_luma_dataset`. The
+data was downloaded from The Cancer Genome Atlas on 12th of April, 2020. It
+contains transcript level read counts for 300 pre-selected genes of 40 patients
+with Luminal A type breast cancer (primary tumor and solid normal samples).
 Transcript level expression was estimated with RSEM.
 
 ```{r setup}
 library("SplicingFactory")
 
-data(example_dataset)
+data(tcga_brca_luma_dataset)
 
 # Extract gene names
-genes <- example_dataset[, 1] 
+genes <- tcga_brca_luma_dataset[, 1]
 
 # Extract sample conditions
-samples <- ifelse(grepl("_N", colnames(example_dataset)[-1]),
+samples <- ifelse(grepl("_N", colnames(tcga_brca_luma_dataset)[-1]),
                   "Solid tissue normal", "Primary Tumor")
 
 # Extract read count matrix
-x <- example_dataset[, -1]
+x <- tcga_brca_luma_dataset[, -1]
 
 dim(x)
 

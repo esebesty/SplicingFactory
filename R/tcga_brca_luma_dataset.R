@@ -8,7 +8,13 @@
 #'
 #' @usage data(example_dataset)
 #'
-#' @format An object of class \code{"cross"}; see \code{\link[qtl]{read.cross}}.
+#' @format A data frame with 1054 rows and 41 columns. The first 3 columns
+#' contain the following:
+#' \describe{
+#'   \item{genes}{Gene names}
+#'   \item{TCGA-A7-A0CH_N}{TCGA-A7-A0CH patient normal tissue sample}
+#'   \item{TCGA-A7-A0CH_T}{TCGA-A7-A0CH patient tumor tissue sample}
+#' }.
 #'
 #' @keywords datasets
 #'
@@ -17,4 +23,4 @@
 #'
 #' @source \href{https://portal.gdc.cancer.gov/legacy-archive}{TCGA Legacy}
 #'
-"example_dataset"
+"tcga_brca_luma_dataset"

@@ -17,7 +17,7 @@ calculate_entropy <- function(x, norm = TRUE) {
     if (sum(x) != 0 & length(x) > 1) {
         x <- x/sum(x)
         x_log = ifelse(is.finite(log(x, base = 2)), log(x, base = 2), 0)
-        
+
         if (norm == FALSE) {
             x = -sum(x * x_log)
         }
@@ -44,15 +44,15 @@ calculate_entropy <- function(x, norm = TRUE) {
 #' @details
 #' The function calculates a Laplace entropy value as part of different
 #' diversity calculations. Given a vector of transcript-level expression values
-#' of a gene, this function characterize the diversity of splicing isoforms for a
-#' gene. If there only one single transcript, the resulted index will be NaN, as
-#' diversity cannot be calculated. If the expression of the given gene is 0, the
-#' diversity index will be NA.
+#' of a gene, this function characterize the diversity of splicing isoforms for
+#' a gene. If there only one single transcript, the resulted index will be NaN,
+#' as diversity cannot be calculated. If the expression of the given gene is 0,
+#' the diversity index will be NA.
 calculate_laplace_entropy <- function(x, norm = TRUE) {
     if (sum(x) != 0 & length(x) > 1) {
         x <- (x + 1)/sum(x + 1)
         x_log = ifelse(is.finite(log(x, base = 2)), log(x, base = 2), 0)
-        
+
         if (norm == FALSE) {
             x = -sum(x * x_log)
         }
@@ -76,10 +76,10 @@ calculate_laplace_entropy <- function(x, norm = TRUE) {
 #' @details
 #' The function calculates a Gini coefficient as part of different
 #' diversity calculations. Given a vector of transcript-level expression values
-#' of a gene, this function characterize the diversity of splicing isoforms for a
-#' gene. If there only one single transcript, the resulted index will be NaN, as
-#' diversity cannot be calculated. If the expression of the given gene is 0, the
-#' diversity index will be NA.
+#' of a gene, this function characterize the diversity of splicing isoforms for
+#' a gene. If there only one single transcript, the resulted index will be NaN,
+#' as diversity cannot be calculated. If the expression of the given gene is 0,
+#' the diversity index will be NA.
 calculate_gini <- function(x) {
     if (sum(x) != 0 & length(x) > 1) {
         x <- sort(x)
@@ -101,10 +101,10 @@ calculate_gini <- function(x) {
 #' @details
 #' The function calculates a Simpson index as part of different
 #' diversity calculations. Given a vector of transcript-level expression values
-#' of a gene, this function characterize the diversity of splicing isoforms for a
-#' gene. If there only one single transcript, the resulted index will be NaN, as
-#' diversity cannot be calculated. If the expression of the given gene is 0, the
-#' diversity index will be NA.
+#' of a gene, this function characterize the diversity of splicing isoforms for
+#' a gene. If there only one single transcript, the resulted index will be NaN,
+#' as diversity cannot be calculated. If the expression of the given gene is 0,
+#' the diversity index will be NA.
 calculate_simpson <- function(x) {
     if (sum(x) != 0 & length(x) > 1) {
         x <- x/sum(x)
@@ -125,10 +125,10 @@ calculate_simpson <- function(x) {
 #' @details
 #' The function calculates an inverse Simpson index as part of different
 #' diversity calculations. Given a vector of transcript-level expression values
-#' of a gene, this function characterize the diversity of splicing isoforms for a
-#' gene. If there only one single transcript, the resulted index will be NaN, as
-#' diversity cannot be calculated. If the expression of the given gene is 0, the
-#' diversity index will be NA.
+#' of a gene, this function characterize the diversity of splicing isoforms for
+#' a gene. If there only one single transcript, the resulted index will be NaN,
+#' as diversity cannot be calculated. If the expression of the given gene is 0,
+#' the diversity index will be NA.
 calculate_inverse_simpson <- function(x) {
     if (sum(x) != 0 & length(x) > 1) {
         x <- x/sum(x)

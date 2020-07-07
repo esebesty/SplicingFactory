@@ -20,8 +20,8 @@ expression values of one gene.
 \details{
 The function calculates a Simpson index as part of different
 diversity calculations. Given a vector of transcript-level expression values
-of a gene, this function characterize the diversity of splicing isoforms for a
-gene. If there only one single transcript, the resulted index will be NaN, as
-diversity cannot be calculated. If the expression of the given gene is 0, the
-diversity index will be NA.
+of a gene, this function characterize the diversity of splicing isoforms for
+a gene. If there only one single transcript, the resulted index will be NaN,
+as diversity cannot be calculated. If the expression of the given gene is 0,
+the diversity index will be NA.
 }

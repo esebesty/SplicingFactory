@@ -4,7 +4,7 @@
 \alias{calculate_method}
 \title{Calculate different diversity indexes for a matrix of transcripts.}
 \usage{
-calculate_method(x, genes, method, norm = TRUE)
+calculate_method(x, genes, method, norm = TRUE, verbose = FALSE)
 }
 \arguments{
 \item{x}{An input \code{matrix}, or \code{data.frame} containing
@@ -23,6 +23,9 @@ naive entropy (\code{naive}), Laplace entropy (\code{laplace}), Gini index
 of transcripts for each gene. The normalized entropy values are always
 between 0 and 1. If \code{FALSE}, genes cannot be compared to each other,
 due to possibly different maximum entropy values.}
+
+\item{verbose}{If \code{TRUE}, the function will print additional diagnostic
+messages.}
 }
 \value{
 Gene-level splicing diversity values in a \code{matrix}, where each

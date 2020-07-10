@@ -11,6 +11,7 @@ calculate_difference(
   method = "mean",
   test = "wilcoxon",
   randomizations = 100,
+  verbose = FALSE,
   ...
 )
 }
@@ -33,6 +34,9 @@ Wilcoxon rank sum test or \code{'shuffle'} for a label shuffling test.}
 
 \item{randomizations}{Number of random shuffles, used for the label shuffling
 test (default = 100).}
+
+\item{verbose}{If \code{TRUE}, the function will print additional diagnostic
+messages.}
 
 \item{...}{Further arguments to be passed on for other methods.}
 }

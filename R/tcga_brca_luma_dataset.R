@@ -6,15 +6,11 @@
 #'
 #' @docType data
 #'
-#' @usage data(example_dataset)
+#' @usage data(tcga_brca_luma_dataset)
 #'
-#' @format A data frame with 1054 rows and 41 columns. The first 3 columns
-#' contain the following:
-#' \describe{
-#'   \item{genes}{Gene names}
-#'   \item{TCGA-A7-A0CH_N}{TCGA-A7-A0CH patient normal tissue sample}
-#'   \item{TCGA-A7-A0CH_T}{TCGA-A7-A0CH patient tumor tissue sample}
-#' }.
+#' @format A data frame with 1054 rows and 41 columns. The first column contains
+#' gene names, all additional columns contain RNA-sequencing read counts for
+#' samples.
 #'
 #' @keywords datasets
 #'

@@ -10,7 +10,8 @@ calculate_diversity(
   method = "laplace",
   norm = TRUE,
   tpm = FALSE,
-  SE_assay = 1
+  SE_assay = 1,
+  verbose = FALSE
 )
 }
 \arguments{
@@ -35,9 +36,12 @@ due to possibly different maximum entropy values.}
 serve as an input. If \code{TRUE}, TPM values will be used, if
 \code{FALSE}, read counts will be used.}
 
-\item{SE_assay}{Numeric value. In case of multiple assays in a 
-SummarizedExperiment, this argument is able to pick the right assay from 
+\item{SE_assay}{Numeric value. In case of multiple assays in a
+SummarizedExperiment, this argument is able to pick the right assay from
 your experiment.}
+
+\item{verbose}{If \code{TRUE}, the function will print additional diagnostic
+messages.}
 }
 \value{
 Gene-level splicing diversity values in a \code{data.frame}, where

@@ -13,6 +13,8 @@
 #'   of transcripts for each gene. The normalized entropy values are always
 #'   between 0 and 1. If \code{FALSE}, genes cannot be compared to each other,
 #'   due to possibly different maximum entropy values.
+#' @param verbose If \code{TRUE}, the function will print additional diagnostic
+#'    messages.
 #' @return Gene-level splicing diversity values in a \code{matrix}, where each
 #'   row belongs to a gene and each column belongs to a sample from the data.
 #' @details The function aggregates basic diversity calculations to a matrix of
@@ -20,7 +22,7 @@
 #' and Laplace entropy values, Gini, Simpson or inverse-Simpson diversity
 #' indexes.
 #' @import stats
-calculate_method <- function(x, genes, method, norm = TRUE) {
+calculate_method <- function(x, genes, method, norm = TRUE, verbose = FALSE) {
     if (method == "naive") {
         x <- aggregate(x, by = list(genes), calculate_entropy, norm = norm)
     }
@@ -36,15 +38,15 @@ calculate_method <- function(x, genes, method, norm = TRUE) {
     if (method == "invsimpson") {
         x <- aggregate(x, by = list(genes), calculate_inverse_simpson)
     }
-    
+
     y <- x[apply(x[2:ncol(x)], 1, function(X) all(!is.nan(X))), ]
-    
-    if (nrow(x) - nrow(y) > 0) {
+
+    if (nrow(x) - nrow(y) > 0 && verbose == TRUE) {
         message(paste0("Note: There are ", nrow(x) - nrow(y), " genes with single isoforms,
     which will be exluded from the analysis."))
     }
-    
+
     colnames(y)[1] <- "Gene"
-    
+
     return(y)
 }

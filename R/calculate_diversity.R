@@ -16,9 +16,11 @@
 #' @param tpm In the case of tximport input, TPM values or raw read counts can
 #'   serve as an input. If \code{TRUE}, TPM values will be used, if
 #'   \code{FALSE}, read counts will be used.
-#' @param SE_assay Numeric value. In case of multiple assays in a 
-#'    SummarizedExperiment, this argument is able to pick the right assay from 
+#' @param SE_assay Numeric value. In case of multiple assays in a
+#'    SummarizedExperiment, this argument is able to pick the right assay from
 #'    your experiment.
+#' @param verbose If \code{TRUE}, the function will print additional diagnostic
+#'    messages.
 #' @return Gene-level splicing diversity values in a \code{data.frame}, where
 #'   each row is a gene and each column is a sample from the input data.
 #' @import methods
@@ -67,15 +69,15 @@
 #'
 #' calculate_diversity(x, gene, method = 'laplace', norm = TRUE)
 calculate_diversity <- function(x, genes = NULL, method = "laplace", norm = TRUE, tpm = FALSE,
-                                SE_assay = 1) {
-  if (!(class(x)[1] %in% c("matrix", "data.frame", "list", "DGEList",
-                           "RangedSummarizedExperiment", "SummarizedExperiment")))
+                                SE_assay = 1, verbose = FALSE) {
+  if (!(is.matrix(x) || is.data.frame(x) || is.list(x) || is(x, "DGEList") ||
+      is(x, "RangedSummarizedExperiment") || is(x, "SummarizedExperiment")))
     stop("Input data type is not supported! Please use `?calculate_diversity`
 \t to see the possible arguments and details.")
   if (is(x, "data.frame")) {
     x <- as.matrix(x)
   }
-  if (tpm == TRUE && !is.list(x)) {
+  if (tpm == TRUE && !is.list(x) && verbose == TRUE) {
     message("Note: tpm as a logical argument is only interpreted in case of
             tximport lists.")
   }
@@ -89,9 +91,10 @@ calculate_diversity <- function(x, genes = NULL, method = "laplace", norm = TRUE
       }
     } else if (is(x, "DGEList")) {
       x <- as.matrix(x$counts)
-      message("Note: calculate_diversity methods are only applicable if your
-              DGEList contains transcript-level expression data.")
-      if (tpm == TRUE) {
+      if (verbose == TRUE)
+        message("Note: calculate_diversity methods are only applicable if your
+                DGEList contains transcript-level expression data.")
+      if (tpm == TRUE && verbose == TRUE) {
       message("Note: tpm as a logical argument is only interpreted in case of
               tximport lists.")
       }
@@ -99,7 +102,7 @@ calculate_diversity <- function(x, genes = NULL, method = "laplace", norm = TRUE
       stop("The package cannot find any expression data in your input.", call. = FALSE)
     }
   }
-  if (class(x)[1] %in% c("RangedSummarizedExperiment", "SummarizedExperiment")) {
+  if (is(x, "RangedSummarizedExperiment") || is(x, "SummarizedExperiment")) {
     if (!is.numeric(SE_assay) | length(SummarizedExperiment::assays(x)) < SE_assay) {
       stop("Please give a valid number to pick an assay from your data.", call. = FALSE)
     }
@@ -110,7 +113,7 @@ calculate_diversity <- function(x, genes = NULL, method = "laplace", norm = TRUE
       genes <- rownames(x)
       rownames(x) <- NULL
       if (is.null(genes)) {
-        stop("Please construct a valid gene set for your SummarizedExperiment.", 
+        stop("Please construct a valid gene set for your SummarizedExperiment.",
              call. = FALSE)
       }
     }
@@ -128,20 +131,20 @@ calculate_diversity <- function(x, genes = NULL, method = "laplace", norm = TRUE
          arguments and details.",
          call. = FALSE)
   }
-  if (method == "gini" && norm == FALSE) {
+  if (method == "gini" && norm == FALSE && verbose == TRUE) {
     message("Gini coefficient ranges between 0 (complete equality) and 1 (complete
     inequality). The 'norm' logical argument does not have any effect on the
             calculation.", call. = FALSE)
   }
-  if (method == "simpson" && norm == FALSE) {
+  if (method == "simpson" && norm == FALSE && verbose == TRUE) {
     message("Simpson index ranges between 0 to 1. The 'norm' logical argument
             does not have any effect on the calculation.",
             call. = FALSE)
   }
-  if (method == "invsimpson" && norm == FALSE) {
+  if (method == "invsimpson" && norm == FALSE && verbose == TRUE) {
     message("Inverse Simpson index does not use the 'norm' argument, and it won't
             have any effect on the calculation.", call. = FALSE)
   }
-  result <- calculate_method(x, genes, method, norm)
+  result <- calculate_method(x, genes, method, norm, verbose = verbose)
   return(result)
 }

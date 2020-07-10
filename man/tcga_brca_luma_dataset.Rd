@@ -5,19 +5,15 @@
 \alias{tcga_brca_luma_dataset}
 \title{TCGA Luminal A breast cancer dataset}
 \format{
-A data frame with 1054 rows and 41 columns. The first 3 columns
-contain the following:
-\describe{
-  \item{genes}{Gene names}
-  \item{TCGA-A7-A0CH_N}{TCGA-A7-A0CH patient normal tissue sample}
-  \item{TCGA-A7-A0CH_T}{TCGA-A7-A0CH patient tumor tissue sample}
-}.
+A data frame with 1054 rows and 41 columns. The first column contains
+gene names, all additional columns contain RNA-sequencing read counts for
+samples.
 }
 \source{
 \href{https://portal.gdc.cancer.gov/legacy-archive}{TCGA Legacy}
 }
 \usage{
-data(example_dataset)
+data(tcga_brca_luma_dataset)
 }
 \description{
 Data from The Cancer Genome Atlas, downloaded on 12th April, 2020. It

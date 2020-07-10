@@ -13,6 +13,8 @@
 #'   Wilcoxon rank sum test or \code{'shuffle'} for a label shuffling test.
 #' @param randomizations Number of random shuffles, used for the label shuffling
 #'   test (default = 100).
+#' @param verbose If \code{TRUE}, the function will print additional diagnostic
+#'    messages.
 #' @param ... Further arguments to be passed on for other methods.
 #' @return A \code{data.frame} with the mean or median values of splicing
 #'   diversity across sample categories and all samples, log2(fold change) of
@@ -48,8 +50,9 @@
 #' # 'Healthy' and 'Pathogenic' condition together with the significance values,
 #' # using mean and Wilcoxon rank sum test, use:
 #' calculate_difference(x, samples, control = 'Healthy', method = 'mean', test = 'wilcoxon')
-calculate_difference <- function(x, samples, control, method = "mean", test = "wilcoxon", randomizations = 100,
-    ...) {
+calculate_difference <- function(x, samples, control, method = "mean",
+                                 test = "wilcoxon", randomizations = 100,
+                                 verbose = FALSE, ...) {
     if (!is(x, "data.frame"))
         stop("Input data type is not supported! Please use `?calculate_difference`
          to see the possible arguments and details.",
@@ -77,7 +80,7 @@ calculate_difference <- function(x, samples, control, method = "mean", test = "w
          possible arguments and details.",
             call. = FALSE)
     if (test == "wilcoxon") {
-        if (randomizations != 100)
+        if (randomizations != 100 && verbose == TRUE)
             message("Note: The 'randomizations' argument is an option for label shuffling,
               it won't have any effect on the Wilcoxon rank sum test.",
                 call. = FALSE)
@@ -112,7 +115,7 @@ calculate_difference <- function(x, samples, control, method = "mean", test = "w
     genes_x <- x[, 1]
     x <- as.matrix(x[, c(-1, -ncol(x), -ncol(x) + 1)])
     if (nrow(y) != 0) {
-        if (nrow(x) != 0) {
+        if (nrow(x) != 0 && verbose == TRUE) {
             message(paste0("Note: There are ", nrow(x), " genes with low sample size, which will be
     exluded from the statistical testing."))
         }

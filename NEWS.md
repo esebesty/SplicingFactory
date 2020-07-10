@@ -1,3 +1,11 @@
+# SplicingFactory 0.99.5 (dev)
+
+* Updated DESCRIPTION.
+* Formatting corrections.
+* Corrected bug in data description.
+* Updated methods for obtaining class of input.
+* Added verbose argument for functions.
+
 # SplicingFactory 0.99.4 (dev)
 
 * Code and documentation formatting corrections.

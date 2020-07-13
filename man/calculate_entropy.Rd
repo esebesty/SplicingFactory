@@ -33,3 +33,12 @@ a gene. If there only a single transcript, the diversity value will be NaN,
 as it cannot be calculated. If the expression of the given gene is 0,
 the diversity value will be NA.
 }
+\examples{
+# read counts for the transcripts of a single gene with 5 transcripts
+x <- rnbinom(5, size = 10, prob = 0.4)
+# calculate non-normalized naive entropy value
+entropy <- calculate_entropy(x, norm = FALSE)
+# calculate Laplace-entropy, also normalized for transcript number
+# (the default)
+norm_laplace_entropy <- calculate_entropy(x, pseudocount = 1)
+}

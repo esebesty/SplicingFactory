@@ -1,3 +1,7 @@
+# SplicingFactory 0.99.8 (dev)
+
+* Examples for diversity calculation functions.
+
 # SplicingFactory 0.99.7 (dev)
 
 * More flexible single calculate_entropy function instead of separate naive and

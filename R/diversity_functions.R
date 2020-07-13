@@ -17,6 +17,14 @@
 #' a gene. If there only a single transcript, the diversity value will be NaN,
 #' as it cannot be calculated. If the expression of the given gene is 0,
 #' the diversity value will be NA.
+#' @examples
+#' # read counts for the transcripts of a single gene with 5 transcripts
+#' x <- rnbinom(5, size = 10, prob = 0.4)
+#' # calculate non-normalized naive entropy value
+#' entropy <- calculate_entropy(x, norm = FALSE)
+#' # calculate Laplace-entropy, also normalized for transcript number
+#' # (the default)
+#' norm_laplace_entropy <- calculate_entropy(x, pseudocount = 1)
 calculate_entropy <- function(x, norm = TRUE, pseudocount = 0) {
     if (sum(x) != 0 & length(x) > 1) {
         x <- (x + pseudocount) / sum(x + pseudocount)
@@ -49,6 +57,11 @@ calculate_entropy <- function(x, norm = TRUE, pseudocount = 0) {
 #' a gene. If there only one single transcript, the resulted index will be NaN,
 #' as diversity cannot be calculated. If the expression of the given gene is 0,
 #' the diversity index will be NA.
+#' @examples
+#' # read counts for the transcripts of a single gene with 5 transcripts
+#' x <- rnbinom(5, size = 10, prob = 0.4)
+#' # calculate Gini index
+#' gini <- calculate_gini(x)
 calculate_gini <- function(x) {
     if (sum(x) != 0 & length(x) > 1) {
         x <- sort(x)
@@ -75,6 +88,11 @@ calculate_gini <- function(x) {
 #' a gene. If there only one single transcript, the resulted index will be NaN,
 #' as diversity cannot be calculated. If the expression of the given gene is 0,
 #' the diversity index will be NA.
+#' @examples
+#' # read counts for the transcripts of a single gene with 5 transcripts
+#' x <- rnbinom(5, size = 10, prob = 0.4)
+#' # calculate Simpson index
+#' simpson <- calculate_simpson(x)
 calculate_simpson <- function(x) {
     if (sum(x) != 0 & length(x) > 1) {
         x <- x / sum(x)
@@ -100,6 +118,11 @@ calculate_simpson <- function(x) {
 #' a gene. If there only one single transcript, the resulted index will be NaN,
 #' as diversity cannot be calculated. If the expression of the given gene is 0,
 #' the diversity index will be NA.
+#' @examples
+#' # read counts for the transcripts of a single gene with 5 transcripts
+#' x <- rnbinom(5, size = 10, prob = 0.4)
+#' # calculate inverse Simpson index
+#' invsimpson <- calculate_inverse_simpson(x)
 calculate_inverse_simpson <- function(x) {
     if (sum(x) != 0 & length(x) > 1) {
         x <- x / sum(x)

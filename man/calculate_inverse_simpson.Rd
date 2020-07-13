@@ -25,3 +25,9 @@ a gene. If there only one single transcript, the resulted index will be NaN,
 as diversity cannot be calculated. If the expression of the given gene is 0,
 the diversity index will be NA.
 }
+\examples{
+# read counts for the transcripts of a single gene with 5 transcripts
+x <- rnbinom(5, size = 10, prob = 0.4)
+# calculate inverse Simpson index
+invsimpson <- calculate_inverse_simpson(x)
+}

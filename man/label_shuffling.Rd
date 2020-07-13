@@ -4,7 +4,14 @@
 \alias{label_shuffling}
 \title{Calculate p-values using label shuffling.}
 \usage{
-label_shuffling(x, samples, control, method, randomizations = 100)
+label_shuffling(
+  x,
+  samples,
+  control,
+  method,
+  randomizations = 100,
+  pcorr = "BH"
+)
 }
 \arguments{
 \item{x}{A \code{matrix} with the splicing diversity values.}
@@ -19,9 +26,12 @@ in the input dataset, specifying the category of each sample.}
 value in a condition. Can be \code{'mean'} or \code{'median'}.}
 
 \item{randomizations}{The number of random shuffles.}
+
+\item{pcorr}{P-value correction method applied to the results, as defined in
+the \code{p.adjust} function.}
 }
 \value{
-Raw and Benjamini-Hochberg corrected p-values.
+Raw and corrected p-values.
 }
 \description{
 Calculate p-values using label shuffling.

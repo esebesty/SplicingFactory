@@ -11,6 +11,7 @@ calculate_difference(
   method = "mean",
   test = "wilcoxon",
   randomizations = 100,
+  pcorr = "BH",
   verbose = FALSE,
   ...
 )
@@ -34,6 +35,10 @@ Wilcoxon rank sum test or \code{'shuffle'} for a label shuffling test.}
 
 \item{randomizations}{Number of random shuffles, used for the label shuffling
 test (default = 100).}
+
+\item{pcorr}{P-value correction method applied to the Wilcoxon rank sum test
+or label shuffling test results, as defined in the \code{p.adjust}
+function.}
 
 \item{verbose}{If \code{TRUE}, the function will print additional diagnostic
 messages.}

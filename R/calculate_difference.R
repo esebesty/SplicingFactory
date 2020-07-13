@@ -13,6 +13,9 @@
 #'   Wilcoxon rank sum test or \code{'shuffle'} for a label shuffling test.
 #' @param randomizations Number of random shuffles, used for the label shuffling
 #'   test (default = 100).
+#' @param pcorr P-value correction method applied to the Wilcoxon rank sum test
+#'   or label shuffling test results, as defined in the \code{p.adjust}
+#'   function.
 #' @param verbose If \code{TRUE}, the function will print additional diagnostic
 #'    messages.
 #' @param ... Further arguments to be passed on for other methods.
@@ -52,7 +55,7 @@
 #' calculate_difference(x, samples, control = 'Healthy', method = 'mean', test = 'wilcoxon')
 calculate_difference <- function(x, samples, control, method = "mean",
                                  test = "wilcoxon", randomizations = 100,
-                                 verbose = FALSE, ...) {
+                                 pcorr = "BH", verbose = FALSE, ...) {
     if (!is(x, "data.frame"))
         stop("Input data type is not supported! Please use `?calculate_difference`
          to see the possible arguments and details.",
@@ -72,11 +75,11 @@ calculate_difference <- function(x, samples, control, method = "mean",
     if (!(control %in% samples))
         stop("This control sample type cannot be found in your samples.")
     if (!(method %in% c("mean", "median")))
-        stop("Invalid method. Please use `?calculate_diversity` to see the possible
+        stop("Invalid method. Please use `?calculate_difference` to see the possible
          arguments and details.",
             call. = FALSE)
     if (!(test %in% c("wilcoxon", "shuffle")))
-        stop("Invalid test method. Please use `?calculate_diversity` to see the
+        stop("Invalid test method. Please use `?calculate_difference` to see the
          possible arguments and details.",
             call. = FALSE)
     if (test == "wilcoxon") {
@@ -100,6 +103,13 @@ calculate_difference <- function(x, samples, control, method = "mean",
               correct results.",
                 call. = FALSE)
     }
+    if (!(pcorr %in% c("holm", "hochberg", "hommel", "bonferroni", "BH", "BY",
+                       "fdr", "none"))) {
+      stop("Invalid p-value correction method. Please use `?calculate_difference` to see the
+         possible arguments and details.",
+           call. = FALSE)
+    }
+
     x$cond_1 <- apply(x[grep(unique(samples)[1], samples) + 1], 1, function(x) sum(!is.na(x)))
     x$cond_2 <- apply(x[grep(unique(samples)[2], samples) + 1], 1, function(x) sum(!is.na(x)))
     if (test == "wilcoxon") {
@@ -123,12 +133,16 @@ calculate_difference <- function(x, samples, control, method = "mean",
             p_values <- wilcoxon(y, samples, ...)
         }
         if (test == "shuffle") {
-            p_values <- label_shuffling(y, samples, control, method, randomizations)
+            p_values <- label_shuffling(y, samples, control, method,
+                                        randomizations)
         }
-        y <- data.frame(genes = genes_y, calculate_fc(y, samples, control, method), p_values)
+        y <- data.frame(genes = genes_y, calculate_fc(y, samples, control,
+                                                      method), p_values)
     }
     if (nrow(x) != 0) {
-        x <- data.frame(genes = genes_x, calculate_fc(x, samples, control, method), raw_p_values = NA, adjusted_p_values = NA)
+        x <- data.frame(genes = genes_x, calculate_fc(x, samples, control,
+                                                      method), raw_p_values = NA,
+                        adjusted_p_values = NA)
         if (nrow(y) != 0) {
             return(rbind(y, x))
         } else {

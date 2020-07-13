@@ -2,6 +2,10 @@
 
 export(calculate_difference)
 export(calculate_diversity)
+export(calculate_entropy)
+export(calculate_gini)
+export(calculate_inverse_simpson)
+export(calculate_simpson)
 import(ggplot2)
 import(methods)
 import(stats)

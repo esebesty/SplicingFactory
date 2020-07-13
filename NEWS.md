@@ -1,3 +1,10 @@
+# SplicingFactory 0.99.7 (dev)
+
+* More flexible single calculate_entropy function instead of separate naive and
+  Laplace entropy.
+* P-value correction method can be set by user.
+* Formatting corrections.
+
 # SplicingFactory 0.99.5 (dev)
 
 * Updated DESCRIPTION.
@@ -15,7 +22,7 @@
 
 * SummarizedExperiment input type updated in calculate_diversity, 
   new argument: SE_assay.
-  
+
 * Documentation, vignette updated.
 
 # SplicingFactory 0.99.2 (dev)

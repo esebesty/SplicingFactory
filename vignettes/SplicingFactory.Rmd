@@ -169,7 +169,7 @@ ggplot() +
                aes(x = entropy, group = sample, color = diversity)) +
   geom_density(data = gini_data, alpha = 0.3,
                aes(x = gini, group = sample, color = diversity)) +
-  facet_grid(. ~ sample_type)+
+  facet_grid(. ~ sample_type) +
   scale_color_manual(values = c("black", "darkorchid4")) +
   guides(color = FALSE) +
   theme_minimal() +
@@ -197,7 +197,7 @@ ggplot() +
               alpha = 0.6) +
   geom_violin(data = gini_mean, aes(x = sample_type, y = mean_gini, fill = diversity), 
               alpha = 0.6) +
-  scale_fill_viridis_d()+
+  scale_fill_viridis_d() +
   coord_flip() +
   theme_minimal() +
   labs(x = "Samples",
@@ -233,6 +233,8 @@ There are several mandatory and optional arguments for this function:
   implemented at the moment - Wilcoxon rank sum test and label shuffling test.
 * randomizations - Optional parameter for the label shuffling test. You
   can specify the number of random shuffles (default = 100).
+* pcorr - P-value correction method to use for the test results. Benjamini &
+  Hochberg by default.
 
 To analyze the previously calculated normalized Laplace entropy values with a
 Wilcoxon sum rank test, use the `calculate_difference` function as follows:
@@ -285,11 +287,11 @@ fold change values between the two conditions on the x axis. We used a cutoff of
 ggplot(entropy_significance, aes(x = log2_fold_change,
                                          y = -log10(adjusted_p_values),
                                          color = label)) +
-  geom_point()+
+  geom_point() +
   scale_color_manual(values = c("grey", "red"), guide = "none") +
-  geom_hline(yintercept = -log10(0.05), color = "red")+
+  geom_hline(yintercept = -log10(0.05), color = "red") +
   geom_vline(xintercept = c(0.5, -0.5)) +
-  theme_minimal()+
+  theme_minimal() +
   labs(title = "Normalized Laplace entropy",
        subtitle = "Wilcoxon signed rank test",
        x = "Log2 fold change of mean entropy values",

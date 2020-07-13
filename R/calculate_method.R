@@ -27,7 +27,8 @@ calculate_method <- function(x, genes, method, norm = TRUE, verbose = FALSE) {
         x <- aggregate(x, by = list(genes), calculate_entropy, norm = norm)
     }
     if (method == "laplace") {
-        x <- aggregate(x, by = list(genes), calculate_laplace_entropy, norm = norm)
+        x <- aggregate(x, by = list(genes), calculate_entropy, norm = norm,
+                       pseudocount = 1)
     }
     if (method == "gini") {
         x <- aggregate(x, by = list(genes), calculate_gini)

@@ -2,10 +2,10 @@
 % Please edit documentation in R/diversity_functions.R
 \name{calculate_entropy}
 \alias{calculate_entropy}
-\title{Calculate naive entropy for a vector of transcript-level expression values of
-one gene.}
+\title{Calculate entropy for a vector of transcript-level
+expression values of one gene.}
 \usage{
-calculate_entropy(x, norm = TRUE)
+calculate_entropy(x, norm = TRUE, pseudocount = 0)
 }
 \arguments{
 \item{x}{Vector of expression values.}
@@ -14,19 +14,22 @@ calculate_entropy(x, norm = TRUE)
 of transcripts for each gene. The normalized entropy values are always
 between 0 and 1. If \code{FALSE}, genes cannot be compared to each other,
 due to possibly different maximum entropy values.}
+
+\item{pseudocount}{Pseudocount added to each transcript expression value.
+Default is 0, while Laplace entropy uses a pseudocount of 1.}
 }
 \value{
-A single gene-level naive entropy value.
+A single gene-level entropy value.
 }
 \description{
-Calculate naive entropy for a vector of transcript-level expression values of
-one gene.
+Calculate entropy for a vector of transcript-level
+expression values of one gene.
 }
 \details{
-The function calculates a naive entropy value as part of different
+The function calculates an entropy value as part of different
 diversity calculations. Given a vector of transcript-level expression values
-of a gene, this function characterize the diversity of splicing isoforms for
-a gene. If there only one single transcript, the resulted index will be NaN,
-as diversity cannot be calculated. If the expression of the given gene is 0,
-the diversity index will be NA.
+of a gene, this function characterizes the diversity of splicing isoforms for
+a gene. If there only a single transcript, the diversity value will be NaN,
+as it cannot be calculated. If the expression of the given gene is 0,
+the diversity value will be NA.
 }

@@ -4,7 +4,7 @@
 \alias{wilcoxon}
 \title{Calculate p-values using Wilcoxon rank sum test.}
 \usage{
-wilcoxon(x, samples, paired = FALSE, exact = FALSE)
+wilcoxon(x, samples, pcorr = "BH", paired = FALSE, exact = FALSE)
 }
 \arguments{
 \item{x}{A \code{matrix} with the splicing diversity values.}
@@ -12,13 +12,16 @@ wilcoxon(x, samples, paired = FALSE, exact = FALSE)
 \item{samples}{Character vector with an equal length to the number of columns
 in the input dataset, specifying the category of each sample.}
 
+\item{pcorr}{P-value correction method applied to the results, as defined in
+the \code{p.adjust} function.}
+
 \item{paired}{If \code{TRUE}, the Wilcox-test will be paired, and therefore
 it will be a signed rank test instead of the rank sum test.}
 
 \item{exact}{If \code{TRUE}, an exact p-value will be computed.}
 }
 \value{
-Raw and Benjamini-Hochberg corrected p-values in a matrix.
+Raw and corrected p-values in a matrix.
 }
 \description{
 Calculate p-values using Wilcoxon rank sum test.

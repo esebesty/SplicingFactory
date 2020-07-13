@@ -5,12 +5,18 @@ test_that("Difference calculation methods are correct", {
     diversity <- data.frame(Genes = letters[1:10], matrix(runif(80), ncol = 8))
     samples <- c(rep("Healthy", 4), rep("Pathogenic", 4))
     control <- "Healthy"
+    test <- "wilcoxon"
+    pcorr <- "BH"
 
-    expect_error(calculate_difference(diversity, samples, control, "Unknown method", test), "Invalid method. Please use `?calculate_diversity` to see the possible
+    expect_error(calculate_difference(diversity, samples, control, "Unknown method", test), "Invalid method. Please use `?calculate_difference` to see the possible
          arguments and details.",
         fixed = TRUE)
 
-    expect_error(calculate_difference(diversity, samples, control, "mean", "bootstrap"), "Invalid test method. Please use `?calculate_diversity` to see the
+    expect_error(calculate_difference(diversity, samples, control, "mean", "bootstrap"), "Invalid test method. Please use `?calculate_difference` to see the
+         possible arguments and details.",
+        fixed = TRUE)
+
+    expect_error(calculate_difference(diversity, samples, control, "mean", test, 100, "Unknown correction"), "Invalid p-value correction method. Please use `?calculate_difference` to see the
          possible arguments and details.",
         fixed = TRUE)
 })

@@ -2,7 +2,7 @@
 % Please edit documentation in R/calculate_method.R
 \name{calculate_method}
 \alias{calculate_method}
-\title{Calculate different diversity indexes for a matrix of transcripts.}
+\title{Calculate diversity values for a matrix of transcripts.}
 \usage{
 calculate_method(x, genes, method, norm = TRUE, verbose = FALSE)
 }
@@ -11,8 +11,8 @@ calculate_method(x, genes, method, norm = TRUE, verbose = FALSE)
 transcript-level expression values.}
 
 \item{genes}{Character vector with equal length to the number of rows of the
-input dataset with transcript-level expression values. The values are
-grouped into genes, based on this vector.}
+input dataset with transcript-level expression values. The values in
+\code{x} are grouped into genes based on this vector.}
 
 \item{method}{Method to use for splicing diversity calculation, including
 naive entropy (\code{naive}), Laplace entropy (\code{laplace}), Gini index
@@ -25,18 +25,17 @@ between 0 and 1. If \code{FALSE}, genes cannot be compared to each other,
 due to possibly different maximum entropy values.}
 
 \item{verbose}{If \code{TRUE}, the function will print additional diagnostic
-messages.}
+messages, besides the warnings and errors.}
 }
 \value{
 Gene-level splicing diversity values in a \code{matrix}, where each
   row belongs to a gene and each column belongs to a sample from the data.
 }
 \description{
-Calculate different diversity indexes for a matrix of transcripts.
+Calculate diversity values for a matrix of transcripts.
 }
 \details{
-The function aggregates basic diversity calculations to a matrix of
-transcript-level expression values, in order to calculate gene-level naive
-and Laplace entropy values, Gini, Simpson or inverse-Simpson diversity
-indexes.
+The function calculates diversity values on a matrix of
+transcript-level expression values, aggregated by the genes defined in the
+\code{genes} parameter.
 }

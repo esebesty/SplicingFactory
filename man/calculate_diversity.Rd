@@ -16,11 +16,11 @@ calculate_diversity(
 }
 \arguments{
 \item{x}{A numeric \code{matrix}, \code{data.frame}, \code{tximport} list,
-\code{DGEList} or \code{ExpressionSet}.}
+\code{DGEList}, \code{SummarizedExperiment} or \code{ExpressionSet}.}
 
 \item{genes}{Character vector with equal length to the number of rows of the
-input dataset with transcript-level expression values. The values are
-grouped into genes, based on this vector.}
+input dataset with transcript-level expression values. The values in
+\code{x} are grouped into genes based on this vector.}
 
 \item{method}{Method to use for splicing diversity calculation, including
 naive entropy (\code{naive}), Laplace entropy (\code{laplace}), Gini index
@@ -32,16 +32,16 @@ of transcripts for each gene. The normalized entropy values are always
 between 0 and 1. If \code{FALSE}, genes cannot be compared to each other,
 due to possibly different maximum entropy values.}
 
-\item{tpm}{In the case of tximport input, TPM values or raw read counts can
+\item{tpm}{In the case of a tximport list, TPM values or raw read counts can
 serve as an input. If \code{TRUE}, TPM values will be used, if
 \code{FALSE}, read counts will be used.}
 
-\item{SE_assay}{Numeric value. In case of multiple assays in a
-SummarizedExperiment, this argument is able to pick the right assay from
-your experiment.}
+\item{SE_assay}{An integer value. In case of multiple assays in a
+\code{SummarizedExperiment} input, the argument specifies the assay number
+to use for diversity calculations.}
 
 \item{verbose}{If \code{TRUE}, the function will print additional diagnostic
-messages.}
+messages, besides the warnings and errors.}
 }
 \value{
 Gene-level splicing diversity values in a \code{data.frame}, where
@@ -56,29 +56,31 @@ from RNA-seq or similar datasets.
 
 Given a N x M matrix or similar data structure, where the N rows are
 transcripts and the M columns are samples, and a vector of gene ids, used for
-aggregating the transcript level data, it calculates transcript diversity
-values for each gene in each sample. These diversity values can be used to
-investigate the dominance of a specific splicing isoform for a gene, the
-diversity of splicing isoforms in a gene, and analyze changes in diversity.
+aggregating the transcript level data, the function calculates transcript
+diversity values for each gene in each sample. These diversity values can be
+used to investigate the dominance of a specific transcript for a gene,
+the diversity of transcripts in a gene, and analyze changes in diversity.
 
 There are a number of diversity values implemented in the package. These
 include the following:
 \itemize{
   \item Naive entropy: Shannon entropy using the transcript frequencies as
-    probabilities.
+    probabilities. 0 entropy means a single dominant transcript, higher
+    values mean a more diverse set of transcripts for a gene.
   \item Laplace entropy: Shannon entropy where the transcript frequencies are
     replaced by a Bayesian estimate, using Laplace's prior.
   \item Gini index: a measure of statistical dispersion originally used in
-    economy. This measurement can theoretically range from 0 (complete
-    equality) to 1 (complete inequality).
+    economy. This measurement ranges from 0 (complete equality) to 1
+    (complete inequality). A value of 1 (complete inequality) means a single
+    dominant transcript.
   \item Simpson index: a measure of diversity, characterizing the number of
     different species (transcripts of a gene) in a dataset. Originally, this
     measurement calculates the probability that randomly selected individuals
-    belong to different species. Simpson index ranges between 0 to 1; the
+    belong to different species. Simpson index ranges between 0 and 1; the
     higher the value, the higher the diversity.
-  \item Inverse Simpson index: Similar concept as the original Simpson index,
-    although high inverse-Simpson index originally means greater diversity.
-    It ranges between 1 to the number of transcripts per gene.
+  \item Inverse Simpson index: Similar concept as the Simpson index,
+    although a higher inverse-Simpson index means greater diversity. It
+    ranges between 1 and the total number of transcripts for a gene.
 }
 
 The function can calculate the gene level diversity index using any kind of
@@ -86,11 +88,12 @@ expression measure, including raw read counts, FPKM, RPKM or TPM values,
 although results may vary.
 }
 \examples{
-# matrix with read counts
+# matrix with RNA-seq read counts
 x <- matrix(rpois(60, 10), ncol = 6)
 
 # gene names used for grouping the transcript level data
 gene <- c(rep('Gene1', 3), rep('Gene2', 2), rep('Gene3', 3), rep('Gene4', 2))
 
+# calculating normalized Laplace entropy
 calculate_diversity(x, gene, method = 'laplace', norm = TRUE)
 }

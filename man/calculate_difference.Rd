@@ -48,26 +48,25 @@ messages.}
 \value{
 A \code{data.frame} with the mean or median values of splicing
   diversity across sample categories and all samples, log2(fold change) of
-  the two different conditions, raw and Benjamini-Hochberg corrected
-  p-values.
+  the two different conditions, raw and corrected p-values.
 }
 \description{
 Calculate splicing diversity changes between two conditions.
 }
 \details{
 The function calculates diversity changes between two sample
-conditions, given by the user. It uses the output of the diversity
-calculation function from this package, which is a \code{data.frame} of
-splicing diversity values. The \code{data.frame} consists of the diversity
-values, where the rows are genes and the columns are samples. Additionally,
-the first column is the gene id. A vector of sample conditions also serves as
-input, used for aggregating the samples by condition. It calculates the mean
-or median of the splicing diversity data per sample condition, the difference
-of these values and the log2 fold change of the two conditions.
+conditions. It uses the output of the diversity calculation function, which
+is a \code{data.frame} of splicing diversity values. The \code{data.frame}
+consists of the diversity values, where the rows are genes and the columns
+are samples. Additionally, the first column is the gene id. A vector of
+sample conditions also serves as input, used for aggregating the samples by
+condition. It calculates the mean or median of the splicing diversity data
+per sample condition, the difference of these values and the log2 fold change
+of the two conditions.
 
 Furthermore, the user can select a statistical method to calculate the
 significance of the changes. The p-values and adjusted p-values are
-calculated by Wilcoxon sum rank test or label shuffling test.
+calculated using a Wilcoxon sum rank test or label shuffling test.
 
 The function will exclude genes of low sample size from the significance
 calculation, depending on which statistical test is applied.

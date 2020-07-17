@@ -1,3 +1,7 @@
+# SplicingFactory 0.99.9 (dev)
+
+* Documentation and code formatting updates.
+
 # SplicingFactory 0.99.8 (dev)
 
 * Examples for diversity calculation functions.

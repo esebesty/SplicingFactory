@@ -19,6 +19,7 @@ calculate_fc <- function(x, samples, control, method = "mean") {
     if (method == "mean") {
         value <- aggregate(t(x), by = list(samples), mean, na.rm = TRUE)
     }
+
     if (method == "median") {
         value <- aggregate(t(x), by = list(samples), median, na.rm = TRUE)
     }
@@ -29,7 +30,7 @@ calculate_fc <- function(x, samples, control, method = "mean") {
     value[is.nan(value[, 1]), c(1)] <- NA
     value[is.nan(value[, 2]), c(2)] <- NA
 
-    result <- data.frame(value, ifelse(as.matrix(is.na(value[, 1]) |is.na(value[, 2])), NA, value[, 1] - value[,
+    result <- data.frame(value, ifelse(as.matrix(is.na(value[, 1]) | is.na(value[, 2])), NA, value[, 1] - value[,
         2]), ifelse(as.matrix(is.na(value[, 1]) | is.na(value[, 2])), NA, as.matrix(log(value[, 1] / value[, 2],
         base = 2))))
     colnames(result) <- c(paste0(sorted[1, 1], "_", method), paste0(sorted[2, 1], "_", method), paste0(method,

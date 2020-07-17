@@ -21,23 +21,22 @@
 #' @param ... Further arguments to be passed on for other methods.
 #' @return A \code{data.frame} with the mean or median values of splicing
 #'   diversity across sample categories and all samples, log2(fold change) of
-#'   the two different conditions, raw and Benjamini-Hochberg corrected
-#'   p-values.
+#'   the two different conditions, raw and corrected p-values.
 #' @import methods ggplot2 tidyr
 #' @export
 #' @details The function calculates diversity changes between two sample
-#' conditions, given by the user. It uses the output of the diversity
-#' calculation function from this package, which is a \code{data.frame} of
-#' splicing diversity values. The \code{data.frame} consists of the diversity
-#' values, where the rows are genes and the columns are samples. Additionally,
-#' the first column is the gene id. A vector of sample conditions also serves as
-#' input, used for aggregating the samples by condition. It calculates the mean
-#' or median of the splicing diversity data per sample condition, the difference
-#' of these values and the log2 fold change of the two conditions.
+#' conditions. It uses the output of the diversity calculation function, which
+#' is a \code{data.frame} of splicing diversity values. The \code{data.frame}
+#' consists of the diversity values, where the rows are genes and the columns
+#' are samples. Additionally, the first column is the gene id. A vector of
+#' sample conditions also serves as input, used for aggregating the samples by
+#' condition. It calculates the mean or median of the splicing diversity data
+#' per sample condition, the difference of these values and the log2 fold change
+#' of the two conditions.
 #'
 #' Furthermore, the user can select a statistical method to calculate the
 #' significance of the changes. The p-values and adjusted p-values are
-#' calculated by Wilcoxon sum rank test or label shuffling test.
+#' calculated using a Wilcoxon sum rank test or label shuffling test.
 #'
 #' The function will exclude genes of low sample size from the significance
 #' calculation, depending on which statistical test is applied.
@@ -56,32 +55,46 @@
 calculate_difference <- function(x, samples, control, method = "mean",
                                  test = "wilcoxon", randomizations = 100,
                                  pcorr = "BH", verbose = FALSE, ...) {
-    if (!is(x, "data.frame"))
+    if (!is(x, "data.frame")) {
         stop("Input data type is not supported! Please use `?calculate_difference`
          to see the possible arguments and details.",
             call. = FALSE)
-    if (ncol(x) - 1 != length(samples))
+    }
+
+    if (ncol(x) - 1 != length(samples)) {
         stop("The number of columns in the data.frame is not equal to the number of
          samples defined in the samples argument.",
             call. = FALSE)
-    if (length(levels(as.factor(samples))) > 2)
+    }
+
+    if (length(levels(as.factor(samples))) > 2) {
         stop("The number of conditions are higher than two. Please use exactly two
          different sample conditions, e.g. healthy and pathogenic.",
             call. = FALSE)
-    if (length(levels(as.factor(samples))) < 2)
+    }
+
+    if (length(levels(as.factor(samples))) < 2) {
         stop("The number of conditions are smaller than two. Please use exactly two
          different sample conditions, e.g. healthy and pathogenic.",
             call. = FALSE)
-    if (!(control %in% samples))
+    }
+
+    if (!(control %in% samples)) {
         stop("This control sample type cannot be found in your samples.")
-    if (!(method %in% c("mean", "median")))
+    }
+
+    if (!(method %in% c("mean", "median"))) {
         stop("Invalid method. Please use `?calculate_difference` to see the possible
          arguments and details.",
             call. = FALSE)
-    if (!(test %in% c("wilcoxon", "shuffle")))
+    }
+
+    if (!(test %in% c("wilcoxon", "shuffle"))) {
         stop("Invalid test method. Please use `?calculate_difference` to see the
          possible arguments and details.",
             call. = FALSE)
+    }
+
     if (test == "wilcoxon") {
         if (randomizations != 100 && verbose == TRUE)
             message("Note: The 'randomizations' argument is an option for label shuffling,
@@ -95,6 +108,7 @@ calculate_difference <- function(x, samples, control, method = "mean",
               theoretical p-value smaller than 0.05.",
                 call. = FALSE)
     }
+
     if (test == "shuffle") {
         if (length(samples) <= 5)
             warning("Low sample size, not enough samples for label shuffling!", call. = FALSE)
@@ -103,6 +117,7 @@ calculate_difference <- function(x, samples, control, method = "mean",
               correct results.",
                 call. = FALSE)
     }
+
     if (!(pcorr %in% c("holm", "hochberg", "hommel", "bonferroni", "BH", "BY",
                        "fdr", "none"))) {
       stop("Invalid p-value correction method. Please use `?calculate_difference` to see the
@@ -112,18 +127,22 @@ calculate_difference <- function(x, samples, control, method = "mean",
 
     x$cond_1 <- apply(x[grep(unique(samples)[1], samples) + 1], 1, function(x) sum(!is.na(x)))
     x$cond_2 <- apply(x[grep(unique(samples)[2], samples) + 1], 1, function(x) sum(!is.na(x)))
+
     if (test == "wilcoxon") {
         y <- x[x$cond_1 >= 3 & x$cond_2 >= 3 & sum(x$cond_1, x$cond_2) >= 8, ]
         x <- x[x$cond_1 < 3 | x$cond_2 < 3 | sum(x$cond_1, x$cond_2) < 8, ]
     }
+
     if (test == "shuffle") {
         y <- x[x$cond_1 + x$cond_2 >= 5, ]
         x <- x[x$cond_1 + x$cond_2 < 5, ]
     }
+
     genes_y <- y[, 1]
     y <- as.matrix(y[, c(-1, -ncol(y), -ncol(y) + 1)])
     genes_x <- x[, 1]
     x <- as.matrix(x[, c(-1, -ncol(x), -ncol(x) + 1)])
+
     if (nrow(y) != 0) {
         if (nrow(x) != 0 && verbose == TRUE) {
             message(paste0("Note: There are ", nrow(x), " genes with low sample size, which will be
@@ -139,6 +158,7 @@ calculate_difference <- function(x, samples, control, method = "mean",
         y <- data.frame(genes = genes_y, calculate_fc(y, samples, control,
                                                       method), p_values)
     }
+
     if (nrow(x) != 0) {
         x <- data.frame(genes = genes_x, calculate_fc(x, samples, control,
                                                       method), raw_p_values = NA,

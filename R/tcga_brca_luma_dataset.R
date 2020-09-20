@@ -1,14 +1,14 @@
 #' TCGA Luminal A breast cancer dataset
 #'
-#' Data from The Cancer Genome Atlas, downloaded on 12th April, 2020. It
-#' contains transcript level read counts of 20 patient with Luminal A type
+#' Data from The Cancer Genome Atlas, downloaded on 08th September, 2020. It
+#' contains transcript level read counts of 62 patients with Luminal A type
 #' breast cancer (primary tumor and solid normal samples).
 #'
 #' @docType data
 #'
 #' @usage data(tcga_brca_luma_dataset)
 #'
-#' @format A data frame with 1054 rows and 41 columns. The first column contains
+#' @format A data frame with 1009 rows and 125 columns. The first column contains
 #' gene names, all additional columns contain RNA-sequencing read counts for
 #' samples.
 #'

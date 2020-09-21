@@ -21,10 +21,10 @@
 #'    to use for diversity calculations.
 #' @param verbose If \code{TRUE}, the function will print additional diagnostic
 #'    messages, besides the warnings and errors.
-#' @return Gene-level splicing diversity values in a \code{data.frame}, where
-#'   each row is a gene and each column is a sample from the input data.
+#' @return Gene-level splicing diversity values in a \code{SummarizedExperiment}
+#'    object.
 #' @import methods
-#' @importFrom SummarizedExperiment assays assay
+#' @importFrom SummarizedExperiment SummarizedExperiment assays assay
 #' @export
 #' @details The function is intended to process transcript-level expression data
 #' from RNA-seq or similar datasets.
@@ -67,17 +67,17 @@
 #' x <- matrix(rpois(60, 10), ncol = 6)
 #'
 #' # gene names used for grouping the transcript level data
-#' gene <- c(rep('Gene1', 3), rep('Gene2', 2), rep('Gene3', 3), rep('Gene4', 2))
+#' gene <- c(rep("Gene1", 3), rep("Gene2", 2), rep("Gene3", 3), rep("Gene4", 2))
 #'
 #' # calculating normalized Laplace entropy
-#' calculate_diversity(x, gene, method = 'laplace', norm = TRUE)
+#' result <- calculate_diversity(x, gene, method = "laplace", norm = TRUE)
 calculate_diversity <- function(x, genes = NULL, method = "laplace", norm = TRUE,
                                 tpm = FALSE, SE_assay = 1, verbose = FALSE) {
-
   if (!(is.matrix(x) || is.data.frame(x) || is.list(x) || is(x, "DGEList") ||
-      is(x, "RangedSummarizedExperiment") || is(x, "SummarizedExperiment")))
+    is(x, "RangedSummarizedExperiment") || is(x, "SummarizedExperiment"))) {
     stop("Input data type is not supported! Please use `?calculate_diversity`
 \t to see the possible arguments and details.")
+  }
 
   if (is(x, "data.frame")) {
     x <- as.matrix(x)
@@ -98,11 +98,12 @@ calculate_diversity <- function(x, genes = NULL, method = "laplace", norm = TRUE
       }
     } else if (is(x, "DGEList")) {
       x <- as.matrix(x$counts)
-      if (verbose == TRUE)
+      if (verbose == TRUE) {
         message("Note: calculate_diversity methods are only applicable if your
                 DGEList contains transcript-level expression data.")
+      }
       if (tpm == TRUE && verbose == TRUE) {
-      message("Note: tpm as a logical argument is only interpreted in case of
+        message("Note: tpm as a logical argument is only interpreted in case of
               tximport lists.")
       }
     } else {
@@ -122,7 +123,8 @@ calculate_diversity <- function(x, genes = NULL, method = "laplace", norm = TRUE
       rownames(x) <- NULL
       if (is.null(genes)) {
         stop("Please construct a valid gene set for your SummarizedExperiment.",
-             call. = FALSE)
+          call. = FALSE
+        )
       }
     }
   }
@@ -143,7 +145,8 @@ calculate_diversity <- function(x, genes = NULL, method = "laplace", norm = TRUE
   if (!(method %in% c("naive", "laplace", "gini", "simpson", "invsimpson"))) {
     stop("Invalid method. Please use `?calculate_diversity` to see the possible
          arguments and details.",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
 
   if (method == "gini" && norm == FALSE && verbose == TRUE) {
@@ -155,7 +158,8 @@ calculate_diversity <- function(x, genes = NULL, method = "laplace", norm = TRUE
   if (method == "simpson" && norm == FALSE && verbose == TRUE) {
     message("Simpson index ranges between 0 to 1. The 'norm' logical argument
             does not have any effect on the calculation.",
-            call. = FALSE)
+      call. = FALSE
+    )
   }
 
   if (method == "invsimpson" && norm == FALSE && verbose == TRUE) {
@@ -164,5 +168,14 @@ calculate_diversity <- function(x, genes = NULL, method = "laplace", norm = TRUE
   }
 
   result <- calculate_method(x, genes, method, norm, verbose = verbose)
+
+  result_assay <- result[, -1]
+  result_rowData <- data.frame(genes = result[, 1], row.names = result[, 1])
+  result_metadata <- list(method = method, norm = norm)
+
+  result <- SummarizedExperiment(assays = list(diversity = result_assay),
+                                 rowData = result_rowData,
+                                 metadata = result_metadata)
+
   return(result)
 }

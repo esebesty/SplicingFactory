@@ -2,9 +2,10 @@ Package: SplicingFactory
 Type: Package
 Title: Splicing Diversity Analysis for Transcriptome Data
 biocViews: Transcriptomics, RNASeq, DifferentialSplicing, AlternativeSplicing, TranscriptomeVariant
-Version: 0.99.9
+Version: 0.99.10
 Authors@R: c(
     person("Peter A.", "Szikora", role = c("aut"), email = "peter.andras.szikora@gmail.com"),
+    person("Tamas", "Por", role = c("aut"), email = "tomasz.por@gmail.com"),
     person("Endre", "Sebestyen", role = c("aut", "cre"), email = "sebestyen.endre@med.semmelweis-univ.hu", comment = c(ORCID = "0000-0001-5470-2161")))
 Description: The SplicingFactory R package uses transcript-level expression
     values to analyze splicing diversity based on various statistical measures,

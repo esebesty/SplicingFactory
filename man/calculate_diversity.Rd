@@ -44,8 +44,8 @@ to use for diversity calculations.}
 messages, besides the warnings and errors.}
 }
 \value{
-Gene-level splicing diversity values in a \code{data.frame}, where
-  each row is a gene and each column is a sample from the input data.
+Gene-level splicing diversity values in a \code{SummarizedExperiment}
+   object.
 }
 \description{
 Main function for calculating splicing diversity
@@ -92,8 +92,8 @@ although results may vary.
 x <- matrix(rpois(60, 10), ncol = 6)
 
 # gene names used for grouping the transcript level data
-gene <- c(rep('Gene1', 3), rep('Gene2', 2), rep('Gene3', 3), rep('Gene4', 2))
+gene <- c(rep("Gene1", 3), rep("Gene2", 2), rep("Gene3", 3), rep("Gene4", 2))
 
 # calculating normalized Laplace entropy
-calculate_diversity(x, gene, method = 'laplace', norm = TRUE)
+result <- calculate_diversity(x, gene, method = "laplace", norm = TRUE)
 }

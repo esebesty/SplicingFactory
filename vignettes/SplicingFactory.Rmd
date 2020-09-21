@@ -1,6 +1,6 @@
 ---
 title: "SplicingFactory"
-author: "Péter Szikora, Endre Sebestyén"
+author: "Péter Szikora, Tamás Pór, Endre Sebestyén"
 date: "`r Sys.Date()`"
 abstract: >
   SplicingFactory is an R package for the analysis of alternative splicing
@@ -92,19 +92,21 @@ Transcript level expression was estimated with RSEM.
 
 ```{r setup}
 library("SplicingFactory")
+library("SummarizedExperiment")
 
 data(tcga_brca_luma_dataset)
 
-# Extract gene names
+# extract gene names
 genes <- tcga_brca_luma_dataset[, 1]
 
-# Extract sample conditions
+# extract sample conditions
 samples <- ifelse(grepl("_N", colnames(tcga_brca_luma_dataset)[-1]),
                   "Solid tissue normal", "Primary Tumor")
 
-# Extract read count matrix
+# extract read count matrix
 x <- tcga_brca_luma_dataset[, -1]
 
+# check dataset
 dim(x)
 
 head(x[1:5])
@@ -120,7 +122,7 @@ To calculate Laplace entropy, where values are normalized between 0 and 1, use:
 laplace_entropy <- calculate_diversity(x, genes,  method = "laplace",
                                        norm = TRUE)
 
-head(laplace_entropy[1:5])
+head(assay(laplace_entropy[1:5]))
 ```
 
 To calculate Gini index, you don't need to specify the 'norm' argument, as the
@@ -130,8 +132,12 @@ inequality).
 ```{r}
 gini_index <- calculate_diversity(x, genes, method = "gini")
 
-head(gini_index[1:5])
+head(assay(gini_index[1:5]))
 ```
+
+Both for the Laplace-entropy and Gini index calculation, the package returns a
+`SummarizedExperiment` object, that you can investigate further with the `assay`
+function.
 
 During the calculation the package produces a note about 50 genes with a single
 isoform, which are excluded from the analysis. The package automatically filters
@@ -152,14 +158,20 @@ it by using ggplot2 from the tidyverse package collection.
 library(tidyr, quietly = TRUE)
 library(ggplot2, quietly = TRUE)
 
-laplace_data <- pivot_longer(laplace_entropy, -Gene, names_to = "sample", values_to = "entropy")
-laplace_data$sample_type <- apply(laplace_data[, 2], 1, function(x) ifelse(grepl("_N", x), "Normal", "Tumor"))
+laplace_data <- pivot_longer(assay(laplace_entropy), -Gene, names_to = "sample",
+                             values_to = "entropy")
+laplace_data$sample_type <- apply(laplace_data[, 2], 1,
+                                  function(x) ifelse(grepl("_N", x),
+                                                     "Normal", "Tumor"))
 laplace_data <- drop_na(laplace_data)
 laplace_data$Gene <- paste0(laplace_data$Gene, "_", laplace_data$sample_type)
 laplace_data$diversity <-  "Normalized Laplace entropy"
 
-gini_data <- pivot_longer(gini_index, -Gene, names_to = "sample", values_to = "gini")
-gini_data$sample_type <- apply(gini_data[, 2], 1, function(x) ifelse(grepl("_N", x), "Normal", "Tumor"))
+gini_data <- pivot_longer(assay(gini_index), -Gene, names_to = "sample",
+                          values_to = "gini")
+gini_data$sample_type <- apply(gini_data[, 2], 1,
+                               function(x) ifelse(grepl("_N", x),
+                                                  "Normal", "Tumor"))
 gini_data <- drop_na(gini_data)
 gini_data$Gene <- paste0(gini_data$Gene, "_", gini_data$sample_type)
 gini_data$diversity <-  "Gini index"
@@ -176,26 +188,29 @@ ggplot() +
   labs(x = "Diversity",
        y = "Density")
 
-laplace_entropy_mean <- aggregate(laplace_data$entropy, by = list(laplace_data$Gene), mean)
+laplace_entropy_mean <- aggregate(laplace_data$entropy,
+                                  by = list(laplace_data$Gene), mean)
 colnames(laplace_entropy_mean)[2] <- "mean_entropy"
 laplace_entropy_mean <- as_tibble(laplace_entropy_mean)
-laplace_entropy_mean$sample_type <- apply(laplace_entropy_mean[,2], 1, 
-                                          function(x) ifelse(grepl("_Normal", x), "Normal", "Tumor"))
+laplace_entropy_mean$sample_type <- apply(laplace_entropy_mean[,2], 1,
+                                          function(x) ifelse(grepl("_Normal", x),
+                                                             "Normal", "Tumor"))
 laplace_entropy_mean$diversity <-  "Normalized Laplace entropy"
 
 gini_mean <- aggregate(gini_data$gini, by = list(gini_data$Gene), mean)
 colnames(gini_mean)[2] <- "mean_gini"
 gini_mean <- as_tibble(gini_mean)
-gini_mean$sample_type <- apply(gini_mean[,2], 1, 
-                                          function(x) ifelse(grepl("_Normal", x), "Normal", "Tumor"))
+gini_mean$sample_type <- apply(gini_mean[,2], 1,
+                                          function(x) ifelse(grepl("_Normal", x),
+                                                             "Normal", "Tumor"))
 gini_mean$diversity <-  "Gini index"
 
-
-
 ggplot() +
-  geom_violin(data = laplace_entropy_mean, aes(x = sample_type, y = mean_entropy, fill = diversity), 
+  geom_violin(data = laplace_entropy_mean, aes(x = sample_type, y = mean_entropy,
+                                               fill = diversity),
               alpha = 0.6) +
-  geom_violin(data = gini_mean, aes(x = sample_type, y = mean_gini, fill = diversity), 
+  geom_violin(data = gini_mean, aes(x = sample_type, y = mean_gini,
+                                    fill = diversity),
               alpha = 0.6) +
   scale_fill_viridis_d() +
   coord_flip() +
@@ -260,12 +275,13 @@ the adjusted p-value is smaller than 0.05. It is recommended to filter for an
 absolute log2 fold change larger than 0.5 besides the adjusted p-value.
 
 ```{r}
-entropy_significance$label <- apply(entropy_significance[, c(5, 7)], 1, 
-                           function(x) ifelse(abs(x[1]) >= 0.5 & x[2] < 0.05, "significant", "non-significant"))
+entropy_significance$label <- apply(entropy_significance[, c(5, 7)], 1,
+                           function(x) ifelse(abs(x[1]) >= 0.5 & x[2] < 0.05,
+                                              "significant", "non-significant"))
 
 entropy_significance$mean <- apply(entropy_significance[, c(2, 3)], 1,
                            function(x) (x[1] + x[2]) / 2)
-                           
+
 
 ggplot(entropy_significance, aes(x = mean, y = log2_fold_change)) +
   geom_point(color = "lightgrey", size = 1) +

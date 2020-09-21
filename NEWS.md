@@ -1,3 +1,9 @@
+# SplicingFactory 0.99.10 (dev)
+
+* SummarizedExperiment output for calculate_diversity
+* Vignette updates
+* Example dataset updates
+
 # SplicingFactory 0.99.9 (dev)
 
 * Documentation and code formatting updates.

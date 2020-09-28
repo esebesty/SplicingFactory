@@ -171,10 +171,12 @@ calculate_diversity <- function(x, genes = NULL, method = "laplace", norm = TRUE
 
   result_assay <- result[, -1]
   result_rowData <- data.frame(genes = result[, 1], row.names = result[, 1])
+  result_colData <- data.frame(samples = colnames(x), row.names = colnames(x))
   result_metadata <- list(method = method, norm = norm)
 
   result <- SummarizedExperiment(assays = list(diversity = result_assay),
                                  rowData = result_rowData,
+                                 colData = result_colData,
                                  metadata = result_metadata)
 
   return(result)

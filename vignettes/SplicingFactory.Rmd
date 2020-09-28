@@ -94,50 +94,51 @@ Transcript level expression was estimated with RSEM.
 library("SplicingFactory")
 library("SummarizedExperiment")
 
+# Load dataset
 data(tcga_brca_luma_dataset)
 
-# extract gene names
+# Extract gene names
 genes <- tcga_brca_luma_dataset[, 1]
 
-# extract sample conditions
+# Extract sample conditions
 samples <- ifelse(grepl("_N", colnames(tcga_brca_luma_dataset)[-1]),
                   "Solid tissue normal", "Primary Tumor")
 
-# extract read count matrix
-x <- tcga_brca_luma_dataset[, -1]
+# Extract read count data without gene names
+readcounts <- tcga_brca_luma_dataset[, -1]
 
-# check dataset
-dim(x)
+# Check read count dataset
+dim(readcounts)
 
-head(x[1:5])
+head(readcounts[1:5])
 ```
 
-As a first step, you might want to filter out genes, with a low expression.
+As a first step, you might want to filter out genes with a low expression.
 
 ### Transcript diversity calculation
 
 To calculate Laplace entropy, where values are normalized between 0 and 1, use:
 
 ```{r}
-laplace_entropy <- calculate_diversity(x, genes,  method = "laplace",
+laplace_entropy <- calculate_diversity(readcounts, genes,  method = "laplace",
                                        norm = TRUE)
 
 head(assay(laplace_entropy[1:5]))
 ```
 
-To calculate Gini index, you don't need to specify the 'norm' argument, as the
+To calculate Gini index, you don't need to specify the `norm` argument, as the
 Gini index is by definition ranges between 0 (complete equality) and 1 (complete
 inequality).
 
 ```{r}
-gini_index <- calculate_diversity(x, genes, method = "gini")
+gini_index <- calculate_diversity(readcounts, genes, method = "gini")
 
 head(assay(gini_index[1:5]))
 ```
 
 Both for the Laplace-entropy and Gini index calculation, the package returns a
-`SummarizedExperiment` object, that you can investigate further with the `assay`
-function.
+`SummarizedExperiment` object, that you can investigate further with the
+`assay()` function.
 
 During the calculation the package produces a note about 50 genes with a single
 isoform, which are excluded from the analysis. The package automatically filters
@@ -155,27 +156,48 @@ the distribution and density of the splicing diversity data, you can visualize
 it by using ggplot2 from the tidyverse package collection.
 
 ```{r}
-library(tidyr, quietly = TRUE)
-library(ggplot2, quietly = TRUE)
+library("tidyr", quietly = TRUE)
+library("ggplot2", quietly = TRUE)
 
-laplace_data <- pivot_longer(assay(laplace_entropy), -Gene, names_to = "sample",
+# Construct data.frame from SummarizedExperiment result
+laplace_data <- cbind(assay(laplace_entropy), Gene = rowData(laplace_entropy)$genes)
+
+# Reshape data.frame
+laplace_data <- pivot_longer(laplace_data, -Gene, names_to = "sample",
                              values_to = "entropy")
+
+# Add sample type information
 laplace_data$sample_type <- apply(laplace_data[, 2], 1,
                                   function(x) ifelse(grepl("_N", x),
                                                      "Normal", "Tumor"))
+
+# Filter genes with NA entropy values
 laplace_data <- drop_na(laplace_data)
+
+# Update gene names and add diversity type column
 laplace_data$Gene <- paste0(laplace_data$Gene, "_", laplace_data$sample_type)
 laplace_data$diversity <-  "Normalized Laplace entropy"
 
-gini_data <- pivot_longer(assay(gini_index), -Gene, names_to = "sample",
+# Construct data.frame from SummarizedExperiment result
+gini_data <- cbind(assay(gini_index), Gene = rowData(gini_index)$genes)
+
+# Reshape data.frame
+gini_data <- pivot_longer(gini_data, -Gene, names_to = "sample",
                           values_to = "gini")
+
+# Add sample type information
 gini_data$sample_type <- apply(gini_data[, 2], 1,
                                function(x) ifelse(grepl("_N", x),
                                                   "Normal", "Tumor"))
+
+# Filter genes with NA gini values
 gini_data <- drop_na(gini_data)
+
+# Update gene names and add diversity type column
 gini_data$Gene <- paste0(gini_data$Gene, "_", gini_data$sample_type)
 gini_data$diversity <-  "Gini index"
 
+# Plot diversity data
 ggplot() +
   geom_density(data = laplace_data, alpha = 0.3,
                aes(x = entropy, group = sample, color = diversity)) +
@@ -185,24 +207,34 @@ ggplot() +
   scale_color_manual(values = c("black", "darkorchid4")) +
   guides(color = FALSE) +
   theme_minimal() +
-  labs(x = "Diversity",
+  labs(x = "Diversity values",
        y = "Density")
 
+# Mean entropy calculation across samples for each gene/sample type combination
 laplace_entropy_mean <- aggregate(laplace_data$entropy,
                                   by = list(laplace_data$Gene), mean)
 colnames(laplace_entropy_mean)[2] <- "mean_entropy"
 laplace_entropy_mean <- as_tibble(laplace_entropy_mean)
-laplace_entropy_mean$sample_type <- apply(laplace_entropy_mean[,2], 1,
+
+# Add sample type information
+laplace_entropy_mean$sample_type <- apply(laplace_entropy_mean[, 1], 1,
                                           function(x) ifelse(grepl("_Normal", x),
                                                              "Normal", "Tumor"))
+
+# Add diversity type column
 laplace_entropy_mean$diversity <-  "Normalized Laplace entropy"
 
+# Mean gini calculation across samples for each gene/sample type combination
 gini_mean <- aggregate(gini_data$gini, by = list(gini_data$Gene), mean)
 colnames(gini_mean)[2] <- "mean_gini"
 gini_mean <- as_tibble(gini_mean)
-gini_mean$sample_type <- apply(gini_mean[,2], 1,
-                                          function(x) ifelse(grepl("_Normal", x),
-                                                             "Normal", "Tumor"))
+
+# Add sample type information
+gini_mean$sample_type <- apply(gini_mean[, 1], 1,
+                               function(x) ifelse(grepl("_Normal", x),
+                                                  "Normal", "Tumor"))
+
+# Add diversity type column
 gini_mean$diversity <-  "Gini index"
 
 ggplot() +
@@ -212,7 +244,7 @@ ggplot() +
   geom_violin(data = gini_mean, aes(x = sample_type, y = mean_gini,
                                     fill = diversity),
               alpha = 0.6) +
-  scale_fill_viridis_d() +
+  scale_fill_viridis_d(name = "Diversity") +
   coord_flip() +
   theme_minimal() +
   labs(x = "Samples",
@@ -220,9 +252,9 @@ ggplot() +
 ```
 
 The two methods are calculating different results. Genes with a single dominant
-isoforms are chacarterized by near-zero entropy, while they have  Gini index
-close to 1. The overall distribution of the data is similar between the two
-conditions.
+isoform have a near-zero entropy, while they have a Gini index
+close to 1. The overall distribution of the data is similar between the Normal
+and Tumor conditions.
 
 ### Differential analysis
 
@@ -235,21 +267,21 @@ conditions, p-values and adjusted p-values for each genes.
 
 There are several mandatory and optional arguments for this function:
 
-* x - Output of the previous function, which is a data.frame with 
-  gene names as the first column and splicing diversity values for 
-  each sample in additional columns.
+* x - Output of the previous function, which is a data.frame with
+gene names as the first column and splicing diversity values for
+each sample in additional columns.
 * samples - The previously defined vector with sample
-  conditions specifying the category of each sample in the correct order.
+conditions specifying the category of each sample in the correct order.
 * control - Name of the control sample category, defined in the samples 
-  vector, e.g. control = "Normal" or control = "WT".
+vector, e.g. control = "Normal" or control = "WT".
 * method - Method to use for calculating the average splicing diversity
-  value in a condition. Can be "mean" or "median".
+value in a condition. Can be "mean" or "median".
 * test - Method to use for p-value calculation. There are two statistical tests
-  implemented at the moment - Wilcoxon rank sum test and label shuffling test.
+implemented at the moment - Wilcoxon rank sum test and label shuffling test.
 * randomizations - Optional parameter for the label shuffling test. You
-  can specify the number of random shuffles (default = 100).
+can specify the number of random shuffles (default = 100).
 * pcorr - P-value correction method to use for the test results. Benjamini &
-  Hochberg by default.
+Hochberg by default.
 
 To analyze the previously calculated normalized Laplace entropy values with a
 Wilcoxon sum rank test, use the `calculate_difference` function as follows:
@@ -276,11 +308,11 @@ absolute log2 fold change larger than 0.5 besides the adjusted p-value.
 
 ```{r}
 entropy_significance$label <- apply(entropy_significance[, c(5, 7)], 1,
-                           function(x) ifelse(abs(x[1]) >= 0.5 & x[2] < 0.05,
-                                              "significant", "non-significant"))
+                                    function(x) ifelse(abs(x[1]) >= 0.5 & x[2] < 0.05,
+                                                       "significant", "non-significant"))
 
 entropy_significance$mean <- apply(entropy_significance[, c(2, 3)], 1,
-                           function(x) (x[1] + x[2]) / 2)
+                                   function(x) (x[1] + x[2]) / 2)
 
 
 ggplot(entropy_significance, aes(x = mean, y = log2_fold_change)) +
@@ -301,8 +333,8 @@ fold change values between the two conditions on the x axis. We used a cutoff of
 
 ```{r}
 ggplot(entropy_significance, aes(x = log2_fold_change,
-                                         y = -log10(adjusted_p_values),
-                                         color = label)) +
+                                 y = -log10(adjusted_p_values),
+                                 color = label)) +
   geom_point() +
   scale_color_manual(values = c("grey", "red"), guide = "none") +
   geom_hline(yintercept = -log10(0.05), color = "red") +

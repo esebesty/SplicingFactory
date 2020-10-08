@@ -90,6 +90,7 @@ although results may vary.
 \examples{
 # matrix with RNA-seq read counts
 x <- matrix(rpois(60, 10), ncol = 6)
+colnames(x) <- paste0("Sample", 1:6)
 
 # gene names used for grouping the transcript level data
 gene <- c(rep("Gene1", 3), rep("Gene2", 2), rep("Gene3", 3), rep("Gene4", 2))

@@ -1,3 +1,7 @@
+# SplicingFactory 0.99.12 (dev)
+
+* Documentation and example updates
+
 # SplicingFactory 0.99.11 (dev)
 
 * SummarizedExperiment corrections

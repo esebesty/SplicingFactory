@@ -14,9 +14,11 @@
 #'   between 0 and 1. If \code{FALSE}, genes cannot be compared to each other,
 #'   due to possibly different maximum entropy values.
 #' @param verbose If \code{TRUE}, the function will print additional diagnostic
-#'    messages, besides the warnings and errors.
-#' @return Gene-level splicing diversity values in a \code{matrix}, where each
-#'   row belongs to a gene and each column belongs to a sample from the data.
+#'   messages, besides the warnings and errors.
+#' @return Gene-level splicing diversity values in a \code{data.frame}, where
+#'   each row belongs to a gene and each column belongs to a sample from the
+#'   data, in addition to the first column, containing gene names, given in the
+#'   `genes` parameter.
 #' @details The function calculates diversity values on a matrix of
 #' transcript-level expression values, aggregated by the genes defined in the
 #' \code{genes} parameter.

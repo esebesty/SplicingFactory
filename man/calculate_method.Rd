@@ -28,8 +28,10 @@ due to possibly different maximum entropy values.}
 messages, besides the warnings and errors.}
 }
 \value{
-Gene-level splicing diversity values in a \code{matrix}, where each
-  row belongs to a gene and each column belongs to a sample from the data.
+Gene-level splicing diversity values in a \code{data.frame}, where
+  each row belongs to a gene and each column belongs to a sample from the
+  data, in addition to the first column, containing gene names, given in the
+  `genes` parameter.
 }
 \description{
 Calculate diversity values for a matrix of transcripts.

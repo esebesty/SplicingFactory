@@ -17,8 +17,8 @@ calculate_difference(
 )
 }
 \arguments{
-\item{x}{A \code{data.frame} with gene names as the first column and splicing
-diversity values for each sample in additional columns.}
+\item{x}{A \code{SummarizedExperiment} with splicing diversity values for
+each gene in each sample.}
 
 \item{samples}{Character vector with an equal length to the number of columns
 in the input dataset, specifying the category of each sample.}
@@ -56,13 +56,12 @@ Calculate splicing diversity changes between two conditions.
 \details{
 The function calculates diversity changes between two sample
 conditions. It uses the output of the diversity calculation function, which
-is a \code{data.frame} of splicing diversity values. The \code{data.frame}
+is a \code{SummarizedExperiment} object of splicing diversity values. It
 consists of the diversity values, where the rows are genes and the columns
-are samples. Additionally, the first column is the gene id. A vector of
-sample conditions also serves as input, used for aggregating the samples by
-condition. It calculates the mean or median of the splicing diversity data
-per sample condition, the difference of these values and the log2 fold change
-of the two conditions.
+are samples. A vector of sample conditions also serves as input, used for
+aggregating the samples by condition. It calculates the mean or median of the
+splicing diversity data per sample condition, the difference of these values
+and the log2 fold change of the two conditions.
 
 Furthermore, the user can select a statistical method to calculate the
 significance of the changes. The p-values and adjusted p-values are

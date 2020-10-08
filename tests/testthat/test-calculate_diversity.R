@@ -17,6 +17,7 @@ test_that("Basic input error handling is working.", {
          input.")
 
         count_matrix <- matrix(rpois(60, 10), ncol = 6)
+        colnames(count_matrix) <- paste0("Sample", 1:6)
 
         expect_error(calculate_diversity(count_matrix, genes, method, norm, tpm), "The number of rows is not equal to the given gene set.")
 

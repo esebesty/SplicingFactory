@@ -288,14 +288,21 @@ To analyze the previously calculated normalized Laplace entropy values with a
 Wilcoxon sum rank test, use the `calculate_difference` function as follows:
 
 ```{r}
-entropy_significance <- calculate_difference(x = laplace_entropy, samples = samples,
-                                             control = "Solid tissue normal",
+# Update the SummarizedExperiment object with a new sample metadata column for
+# sample types
+colData(laplace_entropy) <- cbind(colData(laplace_entropy),
+                                      sample_type = ifelse(grepl("_N", laplace_entropy$samples),
+                                                           "Normal", "Tumor"))
+
+# Calculate significant entropy changes
+entropy_significance <- calculate_difference(x = laplace_entropy, samples = "sample_type",
+                                             control = "Normal",
                                              method = "mean", test = "wilcoxon")
 
 head(entropy_significance)
 ```
 
-The package sends a note about 8 genes, with low sample size, excluded from the
+The package sends a note about 16 genes, with low sample size, excluded from the
 analysis. as these genes had several NA diversity values, the result of 0
 expression values. You need at least 3 samples in each sample category and a
 total of 8 samples for a Wilcoxon test and at least 5 samples in each sample

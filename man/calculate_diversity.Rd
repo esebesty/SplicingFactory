@@ -10,7 +10,7 @@ calculate_diversity(
   method = "laplace",
   norm = TRUE,
   tpm = FALSE,
-  SE_assay = 1,
+  assayno = 1,
   verbose = FALSE
 )
 }
@@ -36,7 +36,7 @@ due to possibly different maximum entropy values.}
 serve as an input. If \code{TRUE}, TPM values will be used, if
 \code{FALSE}, read counts will be used.}
 
-\item{SE_assay}{An integer value. In case of multiple assays in a
+\item{assayno}{An integer value. In case of multiple assays in a
 \code{SummarizedExperiment} input, the argument specifies the assay number
 to use for diversity calculations.}
 

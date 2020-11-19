@@ -12,16 +12,23 @@ calculate_difference(
   test = "wilcoxon",
   randomizations = 100,
   pcorr = "BH",
+  assayno = 1,
   verbose = FALSE,
   ...
 )
 }
 \arguments{
 \item{x}{A \code{SummarizedExperiment} with splicing diversity values for
-each gene in each sample.}
+each gene in each sample or a \code{data.frame} with gene names in the
+first column and splicing diversity values for each sample in additional
+columns.}
 
-\item{samples}{Character vector with an equal length to the number of columns
-in the input dataset, specifying the category of each sample.}
+\item{samples}{A vector of length one, specifying the column name of the
+\code{colData} annotation column from the \code{SummarizedExperiment}
+object, that should be used as the category column or a character vector
+with an equal length to the number of columns in the input dataset,
+specifying the category of each sample in the case of a \code{data.frame}
+input.}
 
 \item{control}{Name of the control sample category, defined in the
 \code{samples} vector, e.g. \code{control = 'Normal'} or \code{control =
@@ -40,6 +47,10 @@ test (default = 100).}
 or label shuffling test results, as defined in the \code{p.adjust}
 function.}
 
+\item{assayno}{An integer value. In case of multiple assays in a
+\code{SummarizedExperiment} input, the argument specifies the assay number
+to use for difference calculations.}
+
 \item{verbose}{If \code{TRUE}, the function will print additional diagnostic
 messages.}
 
@@ -56,16 +67,17 @@ Calculate splicing diversity changes between two conditions.
 \details{
 The function calculates diversity changes between two sample
 conditions. It uses the output of the diversity calculation function, which
-is a \code{SummarizedExperiment} object of splicing diversity values. It
-consists of the diversity values, where the rows are genes and the columns
-are samples. A vector of sample conditions also serves as input, used for
-aggregating the samples by condition. It calculates the mean or median of the
-splicing diversity data per sample condition, the difference of these values
-and the log2 fold change of the two conditions.
+is a \code{SummarizedExperiment} object of splicing diversity values.
+Additionally, it can use a \code{data.frame} as input, where the first column
+contains gene names, and all additional columns contain splicing diversity
+values for each sample. A vector of sample conditions also serves as input,
+used for aggregating the samples by condition.
 
-Furthermore, the user can select a statistical method to calculate the
-significance of the changes. The p-values and adjusted p-values are
-calculated using a Wilcoxon sum rank test or label shuffling test.
+It calculates the mean or median of the splicing diversity data per sample
+condition, the difference of these values and the log2 fold change of the two
+conditions. Furthermore, the user can select a statistical method to
+calculate the significance of the changes. The p-values and adjusted p-values
+are calculated using a Wilcoxon sum rank test or label shuffling test.
 
 The function will exclude genes of low sample size from the significance
 calculation, depending on which statistical test is applied.

@@ -1,3 +1,8 @@
+# SplicingFactory 0.99.13 (dev)
+
+* SummarizedExperiment input for calculate_difference
+* Documentation and example updates
+
 # SplicingFactory 0.99.12 (dev)
 
 * Documentation and example updates

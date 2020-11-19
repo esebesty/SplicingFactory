@@ -1,9 +1,15 @@
 #' Calculate splicing diversity changes between two conditions.
 #'
 #' @param x A \code{SummarizedExperiment} with splicing diversity values for
-#' each gene in each sample.
-#' @param samples Character vector with an equal length to the number of columns
-#'   in the input dataset, specifying the category of each sample.
+#'   each gene in each sample or a \code{data.frame} with gene names in the
+#'   first column and splicing diversity values for each sample in additional
+#'   columns.
+#' @param samples A vector of length one, specifying the column name of the
+#'   \code{colData} annotation column from the \code{SummarizedExperiment}
+#'   object, that should be used as the category column or a character vector
+#'   with an equal length to the number of columns in the input dataset,
+#'   specifying the category of each sample in the case of a \code{data.frame}
+#'   input.
 #' @param control Name of the control sample category, defined in the
 #'   \code{samples} vector, e.g. \code{control = 'Normal'} or \code{control =
 #'   'WT'}.
@@ -16,26 +22,31 @@
 #' @param pcorr P-value correction method applied to the Wilcoxon rank sum test
 #'   or label shuffling test results, as defined in the \code{p.adjust}
 #'   function.
+#' @param assayno An integer value. In case of multiple assays in a
+#'    \code{SummarizedExperiment} input, the argument specifies the assay number
+#'    to use for difference calculations.
 #' @param verbose If \code{TRUE}, the function will print additional diagnostic
 #'    messages.
 #' @param ... Further arguments to be passed on for other methods.
 #' @return A \code{data.frame} with the mean or median values of splicing
 #'   diversity across sample categories and all samples, log2(fold change) of
 #'   the two different conditions, raw and corrected p-values.
-#' @import methods ggplot2 tidyr
+#' @import methods
+#' @importFrom SummarizedExperiment SummarizedExperiment assays assay colData
 #' @export
 #' @details The function calculates diversity changes between two sample
 #' conditions. It uses the output of the diversity calculation function, which
-#' is a \code{SummarizedExperiment} object of splicing diversity values. It
-#' consists of the diversity values, where the rows are genes and the columns
-#' are samples. A vector of sample conditions also serves as input, used for
-#' aggregating the samples by condition. It calculates the mean or median of the
-#' splicing diversity data per sample condition, the difference of these values
-#' and the log2 fold change of the two conditions.
+#' is a \code{SummarizedExperiment} object of splicing diversity values.
+#' Additionally, it can use a \code{data.frame} as input, where the first column
+#' contains gene names, and all additional columns contain splicing diversity
+#' values for each sample. A vector of sample conditions also serves as input,
+#' used for aggregating the samples by condition.
 #'
-#' Furthermore, the user can select a statistical method to calculate the
-#' significance of the changes. The p-values and adjusted p-values are
-#' calculated using a Wilcoxon sum rank test or label shuffling test.
+#' It calculates the mean or median of the splicing diversity data per sample
+#' condition, the difference of these values and the log2 fold change of the two
+#' conditions. Furthermore, the user can select a statistical method to
+#' calculate the significance of the changes. The p-values and adjusted p-values
+#' are calculated using a Wilcoxon sum rank test or label shuffling test.
 #'
 #' The function will exclude genes of low sample size from the significance
 #' calculation, depending on which statistical test is applied.
@@ -53,16 +64,37 @@
 #' calculate_difference(x, samples, control = 'Healthy', method = 'mean', test = 'wilcoxon')
 calculate_difference <- function(x, samples, control, method = "mean",
                                  test = "wilcoxon", randomizations = 100,
-                                 pcorr = "BH", verbose = FALSE, ...) {
-    if (!is(x, "data.frame")) {
+                                 pcorr = "BH", assayno = 1, verbose = FALSE,
+                                 ...) {
+    if (!(is(x, "data.frame") || is(x, "RangedSummarizedExperiment") || is(x, "SummarizedExperiment"))) {
         stop("Input data type is not supported! Please use `?calculate_difference`
          to see the possible arguments and details.",
             call. = FALSE)
     }
 
+    if (is(x, "RangedSummarizedExperiment") || is(x, "SummarizedExperiment")) {
+      if (length(samples) != 1) {
+        stop("In the case of SummarizedExperiment input, the samples argument
+         must be a single character value, specifying the colData column name
+         that should be used as sample categories", call. = FALSE)
+      }
+
+      samples <- colData(x)[[samples]]
+
+      if (!is.numeric(assayno) | length(SummarizedExperiment::assays(x)) < assayno) {
+        stop("Please give a valid number to pick an assay from your data.", call. = FALSE)
+      }
+      else if (is.numeric(assayno)) {
+        x <- as.data.frame(SummarizedExperiment::assays(x)[[assayno]])
+      }
+      genes <- rownames(x)
+      rownames(x) <- NULL
+      x <- cbind(genes, x)
+    }
+
     if (ncol(x) - 1 != length(samples)) {
         stop("The number of columns in the data.frame is not equal to the number of
-         samples defined in the samples argument.",
+          samples defined in the samples argument.",
             call. = FALSE)
     }
 

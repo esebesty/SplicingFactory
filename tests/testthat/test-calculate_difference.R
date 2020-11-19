@@ -39,7 +39,7 @@ test_that("Difference calculation input handling is working.", {
 
 
             expect_error(calculate_difference(diversity, samples, control, method, test), "The number of columns in the data.frame is not equal to the number of
-         samples defined in the samples argument.",
+          samples defined in the samples argument.",
                 fixed = TRUE)
 
             samples <- c(rep("Healthy", 4), rep("Pathogenic", 2), rep("Completely other type of biological condition.",

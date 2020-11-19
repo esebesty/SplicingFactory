@@ -16,7 +16,7 @@
 #' @param tpm In the case of a tximport list, TPM values or raw read counts can
 #'   serve as an input. If \code{TRUE}, TPM values will be used, if
 #'   \code{FALSE}, read counts will be used.
-#' @param SE_assay An integer value. In case of multiple assays in a
+#' @param assayno An integer value. In case of multiple assays in a
 #'    \code{SummarizedExperiment} input, the argument specifies the assay number
 #'    to use for diversity calculations.
 #' @param verbose If \code{TRUE}, the function will print additional diagnostic
@@ -73,7 +73,7 @@
 #' # calculating normalized Laplace entropy
 #' result <- calculate_diversity(x, gene, method = "laplace", norm = TRUE)
 calculate_diversity <- function(x, genes = NULL, method = "laplace", norm = TRUE,
-                                tpm = FALSE, SE_assay = 1, verbose = FALSE) {
+                                tpm = FALSE, assayno = 1, verbose = FALSE) {
   if (!(is.matrix(x) || is.data.frame(x) || is.list(x) || is(x, "DGEList") ||
     is(x, "RangedSummarizedExperiment") || is(x, "SummarizedExperiment"))) {
     stop("Input data type is not supported! Please use `?calculate_diversity`
@@ -113,11 +113,11 @@ calculate_diversity <- function(x, genes = NULL, method = "laplace", norm = TRUE
   }
 
   if (is(x, "RangedSummarizedExperiment") || is(x, "SummarizedExperiment")) {
-    if (!is.numeric(SE_assay) | length(SummarizedExperiment::assays(x)) < SE_assay) {
+    if (!is.numeric(assayno) | length(SummarizedExperiment::assays(x)) < assayno) {
       stop("Please give a valid number to pick an assay from your data.", call. = FALSE)
     }
-    else if (is.numeric(SE_assay)) {
-      x <- as.matrix(SummarizedExperiment::assays(x)[[SE_assay]])
+    else if (is.numeric(assayno)) {
+      x <- as.matrix(SummarizedExperiment::assays(x)[[assayno]])
     }
     if (is.null(genes)) {
       genes <- rownames(x)

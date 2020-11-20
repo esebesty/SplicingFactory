@@ -17,8 +17,7 @@ abstract: >
   read counts or TPM to calculate a diversity measure and then perform a
   differential analysis to identify genes with a significant change between
   conditions. The vignette explains the use of the package with a typical
-  workflow. SplicingFactory package version: `r
-  packageVersion("SplicingFactory")`
+  workflow.
   
 output:
   rmarkdown::html_document:
@@ -41,7 +40,9 @@ knitr::opts_chunk$set(
 
 # Standard workflow
 
-### Input data structure
+SplicingFactory package version: `r packageVersion("SplicingFactory")`
+
+## Input data structure
 
 As input, the SplicingFactory package can use 5 different data types. Besides
 matrices and data frames, you can use the output of tximport, DGELists and
@@ -56,7 +57,7 @@ high-throughput expression level assays. SplicingFactory automatically uses the
 necessary functions for all of these data types, on condition that they were not
 previously modified (e.g. list elements renamed).
 
-### Data arrangement
+## Data arrangement
 
 Besides the format, the input table (matrix, data.frame or the tabular
 expression data extracted from other data structures) needs to be arranged
@@ -68,27 +69,20 @@ gene vector assigns genes to every row in your data, that will be used to
 aggregate transcript level expression information at the gene level. It is
 important that the columns and the rows of the table (genes and samples) are in
 the same order, as the gene and the sample vectors. In case of
-SummarizedExperiment, the genes vector can be empty (but not exclusively) 
+`SummarizedExperiment`, the genes vector can be empty (but not exclusively)
 as the package can automatically extract the necessary vector from the object.
 
-Alternatively, you can use the tximport list as input. In this case, you might
-want to specify the 'tpm' argument. As the default option is FALSE, the raw read
-counts will be extracted from your input data. Set it to TRUE if you want to use
-TPM values.
-
-Another optional argument is 'SE_assay', which is useful if you are planning to 
-analyze a SummarizedExperiment input, containing multiple assays. 'SE_assay' is
-a numeric value, specifying the assay to be analyzed.
-
-## Splicing diversity analysis
-
-### Example dataset
+## Example dataset
 
 The package contains an example dataset called `tcga_brca_luma_dataset`. The
 data was downloaded from The Cancer Genome Atlas on 12th of April, 2020. It
 contains transcript level read counts for 300 pre-selected genes of 40 patients
 with Luminal A type breast cancer (primary tumor and solid normal samples).
 Transcript level expression was estimated with RSEM.
+
+## Splicing diversity analysis
+
+### Importing example data
 
 ```{r setup}
 library("SplicingFactory")
@@ -100,30 +94,45 @@ data(tcga_brca_luma_dataset)
 # Extract gene names
 genes <- tcga_brca_luma_dataset[, 1]
 
-# Extract sample conditions
-samples <- ifelse(grepl("_N", colnames(tcga_brca_luma_dataset)[-1]),
-                  "Solid tissue normal", "Primary Tumor")
-
 # Extract read count data without gene names
 readcounts <- tcga_brca_luma_dataset[, -1]
 
 # Check read count dataset
 dim(readcounts)
 
-head(readcounts[1:5])
+head(readcounts[, 1:5])
 ```
 
-As a first step, you might want to filter out genes with a low expression.
+As a first step, before doing the diversity calculation, you might want to
+filter out genes with a low expression.
 
 ### Transcript diversity calculation
+
+We are going to use the `calculate_diversity` function to calculate two different
+types of transcript diversity.There are several mandatory and optional pamaters
+for the function.
+
+* x - Input data, in various formats, discussed in more detail in the Input data
+structure and Data arrangement section.
+* genes - A vector with gene names used for aggregating the transcript level data.
+* method - Method to use for splicing diversity calculation.
+* norm - If set to `TRUE`, the entropy values are normalized to the number of
+transcripts for each gene.
+* tpm - In the case of a tximport list, you might want set the `tpm` argument.
+As the default option is `FALSE`, the raw  read counts will be extracted from
+your input data. Set it to `TRUE` if you want to use TPM values.
+* assayno - An optional argument is `assayno`, which is useful if you are
+planning to analyze a `SummarizedExperiment` input, containing multiple assays.
+`assayno` is a numeric value, specifying the assay to be analyzed.
+* verbose - Set it to `TRUE` if you want more detailed diagnostic messages.
 
 To calculate Laplace entropy, where values are normalized between 0 and 1, use:
 
 ```{r laplace}
 laplace_entropy <- calculate_diversity(readcounts, genes,  method = "laplace",
-                                       norm = TRUE)
+                                       norm = TRUE, verbose = TRUE)
 
-head(assay(laplace_entropy[1:5]))
+head(assay(laplace_entropy)[, 1:5])
 ```
 
 To calculate Gini index, you don't need to specify the `norm` argument, as the
@@ -131,21 +140,21 @@ Gini index is by definition ranges between 0 (complete equality) and 1 (complete
 inequality).
 
 ```{r gini}
-gini_index <- calculate_diversity(readcounts, genes, method = "gini")
+gini_index <- calculate_diversity(readcounts, genes, method = "gini",
+                                  verbose = TRUE)
 
-head(assay(gini_index[1:5]))
+head(assay(gini_index)[, 1:5])
 ```
 
 Both for the Laplace-entropy and Gini index calculation, the package returns a
 `SummarizedExperiment` object, that you can investigate further with the
-`assay()` function.
+`assay` function.
 
-During the calculation the package produces a note about 50 genes with a single
-isoform, which are excluded from the analysis. The package automatically filters
-out these genes, as splicing diversity values can only be calculated for genes
-with at least 2 splicing isoforms.
+The package automatically filters out genes with a single isoform, as splicing
+diversity values can only be calculated for genes with at least 2 splicing
+isoforms.
 
-Some genes might show NA diversity values. This means that the expression was
+Some genes might show `NA` diversity values. This means that the expression was
 zero for all transcript isoforms of the gene in these samples and the package
 could not calculate any diversity value as there is no meaningful diversity for
 genes which did not show any expression in your experiment. Lack of expression
@@ -253,9 +262,9 @@ ggplot() +
 ```
 
 The two methods are calculating different results. Genes with a single dominant
-isoform have a near-zero entropy, while they have a Gini index
-close to 1. The overall distribution of the data is similar between the Normal
-and Tumor conditions.
+isoform have a near-zero entropy, while they have a Gini index close to 1. The
+overall distribution of the data is similar between the Normal and Tumor
+conditions.
 
 ### Differential analysis
 
@@ -273,7 +282,7 @@ gene names as the first column and splicing diversity values for
 each sample in additional columns.
 * samples - The previously defined vector with sample
 conditions specifying the category of each sample in the correct order.
-* control - Name of the control sample category, defined in the samples 
+* control - Name of the control sample category, defined in the samples
 vector, e.g. control = "Normal" or control = "WT".
 * method - Method to use for calculating the average splicing diversity
 value in a condition. Can be "mean" or "median".
@@ -283,13 +292,19 @@ implemented at the moment - Wilcoxon rank sum test and label shuffling test.
 can specify the number of random shuffles (default = 100).
 * pcorr - P-value correction method to use for the test results. Benjamini &
 Hochberg by default.
+* assayno - An optional argument is `assayno`, which is useful if you are
+planning to analyze a `SummarizedExperiment` input, containing multiple assays.
+`assayno` is a numeric value, specifying the assay to be analyzed.
+* verbose - Set it to `TRUE` if you want more detailed diagnostic messages.
 
-To analyze the previously calculated normalized Laplace entropy values with a
-Wilcoxon sum rank test, use the `calculate_difference` function as follows:
+To analyze the previously calculated normalized Laplace entropy values stored in
+a `SummarizedExperiment` object with a Wilcoxon sum rank test, use the
+`calculate_difference` function as follows:
 
 ```{r}
 # Update the SummarizedExperiment object with a new sample metadata column for
-# sample types
+# sample types, as the the object returned by calculate_difference does not
+# contain this information.
 colData(laplace_entropy) <- cbind(colData(laplace_entropy),
                                       sample_type = ifelse(grepl("_N", laplace_entropy$samples),
                                                            "Normal", "Tumor"))
@@ -297,7 +312,8 @@ colData(laplace_entropy) <- cbind(colData(laplace_entropy),
 # Calculate significant entropy changes
 entropy_significance <- calculate_difference(x = laplace_entropy, samples = "sample_type",
                                              control = "Normal",
-                                             method = "mean", test = "wilcoxon")
+                                             method = "mean", test = "wilcoxon",
+                                             verbose = TRUE)
 
 head(entropy_significance)
 ```

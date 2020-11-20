@@ -7,5 +7,7 @@ inst/doc
 vignettes/*.html
 vignettes/*.pdf
 vignettes/*.R
+vignettes/*.md
+vignettes/figure
 *.swp
 .~lock*

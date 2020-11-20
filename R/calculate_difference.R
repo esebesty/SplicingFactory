@@ -76,9 +76,9 @@ calculate_difference <- function(x, samples, control, method = "mean",
       if (length(samples) != 1) {
         stop("In the case of SummarizedExperiment input, the samples argument
          must be a single character value, specifying the colData column name
-         that should be used as sample categories", call. = FALSE)
+         from the SummarizeExperiment object, that should be used as sample
+         categories", call. = FALSE)
       }
-
       samples <- colData(x)[[samples]]
 
       if (!is.numeric(assayno) | length(SummarizedExperiment::assays(x)) < assayno) {

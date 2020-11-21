@@ -1,3 +1,7 @@
+# SplicingFactory 0.99.15 (dev)
+
+* Adjust sample dataset creating script to the use of SummarizedExperiment
+
 # SplicingFactory 0.99.14 (dev)
 
 * Documentation updates

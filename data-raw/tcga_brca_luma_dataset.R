@@ -4,6 +4,7 @@
 library("tidyverse")
 library("TCGAbiolinks")
 library("SplicingFactory")
+library("SummarizedExperiment")
 
 # Downloaded files will stay here, set for your own preference,
 location <- "/disk/work/users/tp1/projects/transcriptome-noise-in-cc/data/TCGAbiolinks"
@@ -104,11 +105,6 @@ table <- select(data, isoform_id, raw_count, scaled_estimate, patient) %>%
 
 genes <- table$gene_name
 
-samples <- select(data, patient, sample_type) %>%
-  distinct()
-
-samples <- as.character(samples$sample_type)
-
 # Create a table with read counts; each column represents a sample.
 count_table <- select(data, isoform_id, raw_count, patient) %>%
   filter(isoform_id %in% table$isoform_id) %>%
@@ -119,9 +115,14 @@ count_table <- select(data, isoform_id, raw_count, patient) %>%
 
 # Entropy calculation.
 Laplace_diversity <- calculate_diversity(count_table, genes, method = "laplace")
-
-Laplace_readcount_Wilcox <- calculate_difference(Laplace_diversity, samples,
-                                                 control = "Solid Tissue Normal",
+# Update the SummarizedExperiment object with a new sample metadata column for
+# sample types, as the the object returned by calculate_diversity does not
+# contain this information.
+colData(Laplace_diversity) <-cbind(colData(Laplace_diversity), 
+                                   sample_type = ifelse(grepl("_N", Laplace_diversity$samples), 
+                                                        "Normal", "Tumor"))
+Laplace_readcount_Wilcox <- calculate_difference(Laplace_diversity, "sample_type",
+                                                 control = "Normal",
                                                  method = "mean",
                                                  test = "wilcoxon") %>%
   arrange(desc(abs(log2_fold_change)))

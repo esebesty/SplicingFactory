@@ -120,7 +120,8 @@ Laplace_diversity <- calculate_diversity(count_table, genes, method = "laplace")
 # sample types, as the the object returned by calculate_diversity does not
 # contain this information.
 colData(Laplace_diversity) <-cbind(colData(Laplace_diversity), 
-                                   sample_type = ifelse(grepl("_N", Laplace_diversity$samples), 
+                                   sample_type = ifelse(grepl("_N",
+                                                        Laplace_diversity$samples), 
                                                         "Normal", "Tumor"))
 
 Laplace_readcount_Wilcox <- calculate_difference(Laplace_diversity, "sample_type",

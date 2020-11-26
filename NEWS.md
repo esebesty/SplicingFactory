@@ -1,3 +1,7 @@
+# SplicingFactory 0.99.17 (dev)
+
+* Minor corrections
+
 # SplicingFactory 0.99.16 (dev)
 
 * Minor corrections
@@ -13,6 +17,7 @@
 # SplicingFactory 0.99.13 (dev)
 
 * SummarizedExperiment input for calculate_difference
+* Changed SE_assay parameter name to assayno
 * Documentation and example updates
 
 # SplicingFactory 0.99.12 (dev)

@@ -1,3 +1,7 @@
+# SplicingFactory 0.99.18 (dev)
+
+* R version update
+
 # SplicingFactory 0.99.17 (dev)
 
 * Minor corrections

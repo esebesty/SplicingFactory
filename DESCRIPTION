@@ -2,7 +2,7 @@ Package: SplicingFactory
 Type: Package
 Title: Splicing Diversity Analysis for Transcriptome Data
 biocViews: Transcriptomics, RNASeq, DifferentialSplicing, AlternativeSplicing, TranscriptomeVariant
-Version: 0.99.17
+Version: 0.99.18
 Authors@R: c(
     person("Peter A.", "Szikora", role = c("aut"), email = "peter.andras.szikora@gmail.com"),
     person("Tamas", "Por", role = c("aut"), email = "tomasz.por@gmail.com"),
@@ -21,7 +21,7 @@ Suggests:
     rmarkdown,
     ggplot2,
     tidyr
-Depends: R (>= 4.0)
+Depends: R (>= 4.1)
 License: GPL-3 + file LICENSE
 Encoding: UTF-8
 LazyData: true

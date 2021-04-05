@@ -1,16 +1,19 @@
 # Script used to preprocess the example dataset used in the package vignette,
 # and added to the package as tcga_brca_luma_dataset.RData
 
-library("tidyverse")
+library("SummarizedExperiment")
 library("TCGAbiolinks")
 library("SplicingFactory")
-library("SummarizedExperiment")
+library("tidyverse")
+
+#setwd("~/Data/transcriptome-noise-in-cc")
 
 # Downloaded files will stay here, set for your own preference,
-location <- "/disk/work/users/tp1/projects/transcriptome-noise-in-cc/data/TCGAbiolinks"
+#location <- "/disk/work/users/tp1/projects/transcriptome-noise-in-cc/data/TCGAbiolinks" //This is for the server
+location <- "./data/TCGAbiolinks" #on PC
 
 # Depth of your location path (depends on number of sub-directories).
-pathDepth <- 16
+pathDepth <- 10 #16 on server; 10 for PC
 
 # Location of downloaded kgXref table relative to 'location'.
 # Downloaded from here: http://hgdownload.cse.ucsc.edu/goldenpath/hg19/database/kgXrefOld5.txt.gz
@@ -20,7 +23,7 @@ annLocation <- "/annotations/kgXrefOld5.txt"
 annotation <- read_delim(paste0(location, annLocation), "\t",
                          escape_double = FALSE, col_names = FALSE,
                          trim_ws = TRUE) %>%
-  rename(gene_name = X5) %>%
+  dplyr::rename(gene_name = X5) %>%
   # Manual curation due to biological phenomena or annotation error
   # (1 transcript, 2 gene).
   mutate(isoform_id = ifelse(!str_detect(X1, "uc010nxr"),
@@ -35,7 +38,7 @@ query <- GDCquery(project = "TCGA-BRCA",
                   sample.type = c("Primary Tumor","Solid Tissue Normal"))
 
 # Download data files.
-GDCdownload(query, directory = paste0(location, "/data"))
+#GDCdownload(query, directory = paste0(location, "/data"))
 
 # Select breast cancer samples.
 dataSubt <- TCGAquery_subtype(tumor = "brca") %>%
@@ -137,7 +140,7 @@ count_table <- cbind(genes, count_table)
 top_genes <- Laplace_readcount_Wilcox[1:100,]
 
 # Add further 200 genes to the sample dataset.
-set.seed(42)
+set.seed(69)
 
 random_genes <- Laplace_readcount_Wilcox[sample(nrow(Laplace_readcount_Wilcox[100:nrow(Laplace_readcount_Wilcox), ]), 200), ]
 

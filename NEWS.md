@@ -1,3 +1,19 @@
+# SplicingFactory 0.99.19 (dev)
+
+* Added lists of gene names and TCGA sample IDs in tcga_brca_luma_dataset.RData
+
+# SplicingFactory 0.99.18 (dev)
+
+* R version update
+
+# SplicingFactory 0.99.17 (dev)
+
+* Minor corrections
+
+# SplicingFactory 0.99.16 (dev)
+
+* Minor corrections
+
 # SplicingFactory 0.99.15 (dev)
 
 * Adjust sample dataset creating script to the use of SummarizedExperiment
@@ -9,6 +25,7 @@
 # SplicingFactory 0.99.13 (dev)
 
 * SummarizedExperiment input for calculate_difference
+* Changed SE_assay parameter name to assayno
 * Documentation and example updates
 
 # SplicingFactory 0.99.12 (dev)

@@ -2,7 +2,7 @@ Package: SplicingFactory
 Type: Package
 Title: Splicing Diversity Analysis for Transcriptome Data
 biocViews: Transcriptomics, RNASeq, DifferentialSplicing, AlternativeSplicing, TranscriptomeVariant
-Version: 0.99.15
+Version: 0.99.18
 Authors@R: c(
     person("Peter A.", "Szikora", role = c("aut"), email = "peter.andras.szikora@gmail.com"),
     person("Tamas", "Por", role = c("aut"), email = "tomasz.por@gmail.com"),
@@ -14,12 +14,14 @@ Description: The SplicingFactory R package uses transcript-level expression
     Additionally, the package analyzes the isoform diversity data, looking for
     significant changes between conditions.
 RoxygenNote: 7.1.0
-Imports: SummarizedExperiment, methods, stats, ggplot2, tidyr
+Imports: SummarizedExperiment, methods, stats
 Suggests:
     testthat,
     knitr,
-    rmarkdown
-Depends: R (>= 4.0)
+    rmarkdown,
+    ggplot2,
+    tidyr
+Depends: R (>= 4.1)
 License: GPL-3 + file LICENSE
 Encoding: UTF-8
 LazyData: true

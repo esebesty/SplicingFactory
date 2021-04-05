@@ -150,3 +150,10 @@ geneset <- rbind(top_genes, random_genes) %>%
 tcga_brca_luma_dataset <- count_table %>% filter(genes %in% geneset$genes)
 
 save(tcga_brca_luma_dataset, file = "tcga_brca_luma_dataset.RData")
+
+#Extract gene names and sample IDs from dataset
+sample_geneset <- tcga_brca_luma_dataset["genes"]
+TCGA_sample_IDs <- colnames(tcga_brca_luma_dataset[, 2:length(colnames(tcga_brca_luma_dataset))])
+
+write.table(sample_geneset, "./data/sample_geneset.tsv", quote = FALSE, sep = "\t", row.names = FALSE, col.names = FALSE)
+write.table(TCGA_sample_IDs,"./data/TCGA_sample_IDs.tsv", , quote = FALSE, sep = "\t", row.names = FALSE, col.names = FALSE)

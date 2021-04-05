@@ -303,7 +303,7 @@ a `SummarizedExperiment` object with a Wilcoxon sum rank test, use the
 
 ```{r}
 # Update the SummarizedExperiment object with a new sample metadata column for
-# sample types, as the the object returned by calculate_difference does not
+# sample types, as the the object returned by calculate_diversity does not
 # contain this information.
 colData(laplace_entropy) <- cbind(colData(laplace_entropy),
                                       sample_type = ifelse(grepl("_N", laplace_entropy$samples),

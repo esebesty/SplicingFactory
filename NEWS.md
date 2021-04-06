@@ -1,3 +1,7 @@
+# SplicingFactory 0.99.21 (dev)
+
+* Updated lists of gene names and TCGA sample IDs in tcga_brca_luma_dataset.RData
+
 # SplicingFactory 0.99.20 (dev)
 
 * Created new dataset with another random seed in tcga_brca_luma_dataset.RData

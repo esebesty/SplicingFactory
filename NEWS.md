@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 # SplicingFactory 1.1.1 (stable)
 
 * Updates to URL, email and citation
@@ -16,7 +14,6 @@
 
 * Added lists of gene names and TCGA sample IDs in tcga_brca_luma_dataset.RData
 
->>>>>>> 9d09df3... Updates to URL, email and citation
 # SplicingFactory 0.99.18 (dev)
 
 * R version update

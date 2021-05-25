@@ -2,11 +2,11 @@ Package: SplicingFactory
 Type: Package
 Title: Splicing Diversity Analysis for Transcriptome Data
 biocViews: Transcriptomics, RNASeq, DifferentialSplicing, AlternativeSplicing, TranscriptomeVariant
-Version: 1.0.0
+Version: 1.1.1
 Authors@R: c(
     person("Peter A.", "Szikora", role = c("aut"), email = "peter.andras.szikora@gmail.com"),
     person("Tamas", "Por", role = c("aut"), email = "tomasz.por@gmail.com"),
-    person("Endre", "Sebestyen", role = c("aut", "cre"), email = "sebestyen.endre@med.semmelweis-univ.hu", comment = c(ORCID = "0000-0001-5470-2161")))
+    person("Endre", "Sebestyen", role = c("aut", "cre"), email = "endre.sebestyen@gmail.com", comment = c(ORCID = "0000-0001-5470-2161")))
 Description: The SplicingFactory R package uses transcript-level expression
     values to analyze splicing diversity based on various statistical measures,
     like Shannon entropy or the Gini index. These measures can quantify
@@ -21,6 +21,8 @@ Suggests:
     rmarkdown,
     ggplot2,
     tidyr
+URL: https://github.com/SU-CompBio/SplicingFactory
+BugReports: https://github.com/SU-CompBio/SplicingFactory/issues
 Depends: R (>= 4.1)
 License: GPL-3 + file LICENSE
 Encoding: UTF-8

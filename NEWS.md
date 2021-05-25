@@ -1,3 +1,22 @@
+<<<<<<< HEAD
+=======
+# SplicingFactory 1.1.1 (stable)
+
+* Updates to URL, email and citation
+
+# SplicingFactory 0.99.21 (dev)
+
+* Updated lists of gene names and TCGA sample IDs in tcga_brca_luma_dataset.RData
+
+# SplicingFactory 0.99.20 (dev)
+
+* Created new dataset with another random seed in tcga_brca_luma_dataset.RData
+
+# SplicingFactory 0.99.19 (dev)
+
+* Added lists of gene names and TCGA sample IDs in tcga_brca_luma_dataset.RData
+
+>>>>>>> 9d09df3... Updates to URL, email and citation
 # SplicingFactory 0.99.18 (dev)
 
 * R version update

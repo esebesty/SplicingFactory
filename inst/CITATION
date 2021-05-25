@@ -1,0 +1,14 @@
+citHeader("To cite SplicingFactory in publications use:")
+
+citEntry(
+  entry    = "Article",
+  title    = "SplicingFactory – Splicing diversity analysis for transcriptome data",
+  author   = personList(as.person("Péter Szikora"),
+                        as.person("Tamás Pór"),
+                        as.person("Endre Sebestyén")),
+  journal  = "bioRxiv",
+  year     = 2021,
+  doi      = "10.1101/2021.02.03.429568"
+  url      = "https://doi.org/10.1101/2021.02.03.429568",
+  textVersion = "Szikora et al. SplicingFactory – Splicing diversity analysis for transcriptome data. bioRxiv (2021)"
+)

@@ -1,59 +1,69 @@
-# SplicingFactory 1.1.1 (stable)
+# SplicingFactory 1.0.3 (stable)
 
-* Updates to URL, email and citation
+* Bug fix for example data.
+* Other minor changes.
+
+# SplicingFactory 1.0.2 (stable)
+
+* Bug fix for single sample analysis.
+
+# SplicingFactory 1.0.1 (stable)
+
+* Updates to URL, email and citation.
 
 # SplicingFactory 0.99.21 (dev)
 
-* Updated lists of gene names and TCGA sample IDs in tcga_brca_luma_dataset.RData
+* Updated lists of gene names and TCGA sample IDs in
+  tcga_brca_luma_dataset.RData.
 
 # SplicingFactory 0.99.20 (dev)
 
-* Created new dataset with another random seed in tcga_brca_luma_dataset.RData
+* Created new dataset with another random seed in tcga_brca_luma_dataset.RData.
 
 # SplicingFactory 0.99.19 (dev)
 
-* Added lists of gene names and TCGA sample IDs in tcga_brca_luma_dataset.RData
+* Added lists of gene names and TCGA sample IDs in tcga_brca_luma_dataset.RData.
 
 # SplicingFactory 0.99.18 (dev)
 
-* R version update
+* R version update.
 
 # SplicingFactory 0.99.17 (dev)
 
-* Minor corrections
+* Minor corrections.
 
 # SplicingFactory 0.99.16 (dev)
 
-* Minor corrections
+* Minor corrections.
 
 # SplicingFactory 0.99.15 (dev)
 
-* Adjust sample dataset creating script to the use of SummarizedExperiment
+* Adjust sample dataset creating script to the use of SummarizedExperiment.
 
 # SplicingFactory 0.99.14 (dev)
 
-* Documentation updates
+* Documentation updates.
 
 # SplicingFactory 0.99.13 (dev)
 
-* SummarizedExperiment input for calculate_difference
-* Changed SE_assay parameter name to assayno
-* Documentation and example updates
+* SummarizedExperiment input for calculate_difference.
+* Changed SE_assay parameter name to assayno.
+* Documentation and example updates.
 
 # SplicingFactory 0.99.12 (dev)
 
-* Documentation and example updates
+* Documentation and example updates.
 
 # SplicingFactory 0.99.11 (dev)
 
-* SummarizedExperiment corrections
-* Vignette updates
+* SummarizedExperiment corrections.
+* Vignette updates.
 
 # SplicingFactory 0.99.10 (dev)
 
-* SummarizedExperiment output for calculate_diversity
-* Vignette updates
-* Example dataset updates
+* SummarizedExperiment output for calculate_diversity.
+* Vignette updates.
+* Example dataset updates.
 
 # SplicingFactory 0.99.9 (dev)
 

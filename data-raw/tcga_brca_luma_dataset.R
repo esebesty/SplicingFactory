@@ -1,22 +1,26 @@
 # Script used to preprocess the example dataset used in the package vignette,
 # and added to the package as tcga_brca_luma_dataset.RData
 
+library("SplicingFactory")
 library("SummarizedExperiment")
 library("TCGAbiolinks")
-library("SplicingFactory")
+
 library("tidyverse")
 
-#setwd("~/Data/transcriptome-noise-in-cc")
+set.seed(69)
 
-# Downloaded files will stay here, set for your own preference,
-#location <- "/disk/work/users/tp1/projects/transcriptome-noise-in-cc/data/TCGAbiolinks" //This is for the server
-location <- "./data/TCGAbiolinks" #on PC
+# setwd("~/Data/transcriptome-noise-in-cc")
 
-# Depth of your location path (depends on number of sub-directories).
-pathDepth <- 10 #16 on server; 10 for PC
+# Downloaded files will stay here, set for your own preference.
+# location <- "/disk/work/users/tp1/projects/transcriptome-noise-in-cc/data/TCGAbiolinks"
+location <- "/Users/esebesty/Work/repos/group/students/tamas_por/tcga-download"
+# location   <- ""
+
+# Path depth.
+pathDepth <- 16
 
 # Location of downloaded kgXref table relative to 'location'.
-# Downloaded from here: http://hgdownload.cse.ucsc.edu/goldenpath/hg19/database/kgXrefOld5.txt.gz
+# Downloaded from: http://hgdownload.cse.ucsc.edu/goldenpath/hg19/database/kgXrefOld5.txt.gz
 annLocation <- "/annotations/kgXrefOld5.txt"
 
 # Read in annotation file.
@@ -29,7 +33,7 @@ annotation <- read_delim(paste0(location, annLocation), "\t",
   mutate(isoform_id = ifelse(!str_detect(X1, "uc010nxr"),
                              str_split_fixed(X1, "\\.", 2)[, 1], X1))
 
-# TCGA data gathering
+# TCGA data gathering.
 query <- GDCquery(project = "TCGA-BRCA",
                   legacy = TRUE,
                   data.category = "Gene expression",
@@ -38,7 +42,7 @@ query <- GDCquery(project = "TCGA-BRCA",
                   sample.type = c("Primary Tumor","Solid Tissue Normal"))
 
 # Download data files.
-#GDCdownload(query, directory = paste0(location, "/data"))
+# GDCdownload(query, directory = paste0(location, "/data"))
 
 # Select breast cancer samples.
 dataSubt <- TCGAquery_subtype(tumor = "brca") %>%
@@ -50,7 +54,7 @@ LumAPatients <- dataSubt %>%
   select(patient)
 
 # First 20 patients with both tumor and normal samples. We keep only 40 samples
-# to make run time short.
+# to keep running time short.
 result_table <- query[[1]][[1]] %>%
   mutate(tags = as.character(tags)) %>%
   filter(str_detect(tags, "unnormalized")) %>%
@@ -60,11 +64,14 @@ result_table <- query[[1]][[1]] %>%
   filter(length(patient) != 1) %>%
   filter(patient %in% LumAPatients$patient) %>%
   ungroup() %>%
-  arrange(patient) %>% slice_head(n = 40)
+  arrange(patient) %>%
+  slice_head(n = 40)
+
+# Downloaded isoform read count tables.
+tableLocation <- "/data/TCGA-BRCA/legacy/Gene_expression/Isoform_expression_quantification"
 
 # Data read-in.
-samples <- as.data.frame(list.files(paste0(location,
-                                           "/data/TCGA-BRCA/legacy/Gene_expression/Isoform_expression_quantification"),
+samples <- as.data.frame(list.files(paste0(location, tableLocation),
                                     recursive = TRUE, full.names = TRUE))
 
 colnames(samples) <- "file"
@@ -81,22 +88,20 @@ samples <- samples %>%
 # isoform ID; raw read count and a scaled estimate. We do not use the scaled
 # estimate, only the raw read count.
 sampleRead <- function(x) {
-  xd <- read_delim(x, "\t", escape_double = FALSE,
-                   trim_ws = TRUE)
+  xd <- read_delim(x, "\t", escape_double = FALSE, trim_ws = TRUE)
   return(xd)
 }
 
-samplesS <- sapply(as.character(samples$file), FUN = sampleRead,
-                   simplify = FALSE, USE.NAMES = TRUE)
+samples_data <- sapply(as.character(samples$file), FUN = sampleRead,
+                       simplify = FALSE, USE.NAMES = TRUE)
 
 # Preprocess data.
-data <- bind_rows(samplesS, .id = "id") %>%
+data <- bind_rows(samples_data, .id = "id") %>%
   mutate(id = str_split_fixed(id, "\\/", pathDepth)[, pathDepth],
          isoform_id = ifelse(!str_detect(isoform_id, "uc010nxr"),
                              str_split_fixed(isoform_id, "\\.", 2)[, 1],
                              isoform_id)) %>%
-  left_join(select(result_table, file_name, patient, sample_type),
-            by = c("id" = "file_name")) %>%
+  left_join(result_table, by = c("id" = "file_name")) %>%
   arrange(isoform_id) %>%
   mutate(patient = ifelse(sample_type == "Solid Tissue Normal",
                           paste0(patient, "_N"), paste0(patient, "_T")))
@@ -122,10 +127,10 @@ Laplace_diversity <- calculate_diversity(count_table, genes, method = "laplace")
 # Update the SummarizedExperiment object with a new sample metadata column for
 # sample types, as the the object returned by calculate_diversity does not
 # contain this information.
-colData(Laplace_diversity) <-cbind(colData(Laplace_diversity), 
-                                   sample_type = ifelse(grepl("_N",
-                                                        Laplace_diversity$samples), 
-                                                        "Normal", "Tumor"))
+colData(Laplace_diversity) <- cbind(colData(Laplace_diversity),
+                                    sample_type = ifelse(grepl("_N",
+                                                               Laplace_diversity$samples),
+                                                         "Normal", "Tumor"))
 
 Laplace_readcount_Wilcox <- calculate_difference(Laplace_diversity, "sample_type",
                                                  control = "Normal",
@@ -140,20 +145,23 @@ count_table <- cbind(genes, count_table)
 top_genes <- Laplace_readcount_Wilcox[1:100,]
 
 # Add further 200 genes to the sample dataset.
-set.seed(69)
-
-random_genes <- Laplace_readcount_Wilcox[sample(nrow(Laplace_readcount_Wilcox[100:nrow(Laplace_readcount_Wilcox), ]), 200), ]
+random_genes <- Laplace_readcount_Wilcox[sample(nrow(Laplace_readcount_Wilcox[100:nrow(Laplace_readcount_Wilcox),
+                                                                              ]), 200), ]
 
 geneset <- rbind(top_genes, random_genes) %>%
   select(genes)
 
-tcga_brca_luma_dataset <- count_table %>% filter(genes %in% geneset$genes)
+tcga_brca_luma_dataset <- count_table %>%
+  filter(genes %in% geneset$genes)
 
 save(tcga_brca_luma_dataset, file = "tcga_brca_luma_dataset.RData")
 
-#Extract gene names and sample IDs from dataset
-sample_geneset <- tcga_brca_luma_dataset["genes"]
-TCGA_sample_IDs <- colnames(tcga_brca_luma_dataset[, 2:length(colnames(tcga_brca_luma_dataset))])
+# Extract gene names and sample IDs from dataset.
+sample_geneset  <- sort(unique(tcga_brca_luma_dataset[, "genes"]))
+TCGA_sample_IDs <- result_table$cases
 
-write.table(sample_geneset, "./data/sample_geneset.tsv", quote = FALSE, sep = "\t", row.names = FALSE, col.names = FALSE)
-write.table(TCGA_sample_IDs,"./data/TCGA_sample_IDs.tsv", , quote = FALSE, sep = "\t", row.names = FALSE, col.names = FALSE)
+write.table(sample_geneset, "./inst/extdata/tcga_gene_ids.tsv",
+            quote = FALSE, sep = "\t", row.names = FALSE, col.names = FALSE)
+
+write.table(TCGA_sample_IDs, "./inst/extdata/tcga_sample_ids.tsv",
+            quote = FALSE, sep = "\t", row.names = FALSE, col.names = FALSE)

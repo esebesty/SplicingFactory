@@ -9,7 +9,16 @@ significant changes between conditions.
 
 ## Installation
 
-You can install SplicingFactory from github with:
+You can install SplicingFactory using Bioconductor with:
+
+```R
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("SplicingFactory")
+```
+
+Alternatively can install the latest development version from github with:
 
 ```R
 install.packages("devtools")

@@ -57,6 +57,20 @@ high-throughput expression level assays. SplicingFactory automatically uses the
 necessary functions for all of these data types, on condition that they were not
 previously modified (e.g. list elements renamed).
 
+While SplicingFactory can process any kind of numeric value, used to
+measure expression levels, we recommend TPM or similar length normalized values.
+If the read count values are not normalized for the transcript isoform lengths,
+the read count proportions, therefore the diversity values, will be misleading.
+For example, a gene with three transcript isoforms, lengths of 100, 100, and
+1000, and read counts of 20, 20 and 200 for each of them is detected in an
+experiment. Simply using the read counts to calculate proportions, will lead to
+the values of 0.083, 0.083 and 0.83, and to the conclusion that we have a single
+dominant isoform based on the diversity value. However,the third isoform is 10
+times longer than the other two, leading to a larger number of reads originating
+from this isoform. Normalizing for isoform length will lead to the same 0.33
+proportion for all of them, therefore no dominant isoform and a very different
+diversity value.
+
 ## Data arrangement
 
 Besides the format, the input table (matrix, data.frame or the tabular
@@ -75,10 +89,28 @@ as the package can automatically extract the necessary vector from the object.
 ## Example dataset
 
 The package contains an example dataset called `tcga_brca_luma_dataset`. The
-data was downloaded from The Cancer Genome Atlas on 12th of April, 2020. It
-contains transcript level read counts for 300 pre-selected genes of 40 patients
-with Luminal A type breast cancer (primary tumor and solid normal samples).
-Transcript level expression was estimated with RSEM.
+data was downloaded from The Cancer Genome Atlas (TCGA) on 12th of April, 2020.
+It contains transcript level read counts for 300 pre-selected genes of 40
+patients with Luminal A type breast cancer (primary tumor and solid normal
+samples). Transcript level expression was estimated with RSEM.
+
+You can check the list of TCGA sample ids selected with the following code.
+
+```{r extdata1}
+sample_id_file <- system.file("extdata/tcga_sample_ids.tsv",
+                              package = "SplicingFactory")
+
+sample_ids <- read.table(sample_id_file)
+```
+
+You can check the list of pre-selected genes with the following code.
+
+```{r extdata2}
+gene_id_file <- system.file("extdata/tcga_gene_ids.tsv",
+                            package = "SplicingFactory")
+
+gene_ids <- read.table(sample_id_file)
+```
 
 ## Splicing diversity analysis
 
@@ -103,14 +135,33 @@ dim(readcounts)
 head(readcounts[, 1:5])
 ```
 
+### Data filtering and preprocessing
+
 As a first step, before doing the diversity calculation, you might want to
-filter out genes with a low expression.
+filter out genes with a low overall expression or limit the analysis to
+transcripts with a sufficient minimum expression level. Expression estimates of
+transcript isoforms with zero or low expression might be highly variable. For
+more details on the effect of transcript isoform prefiltering on differential
+transcript usage, see [this paper](https://doi.org/10.1186/s13059-015-0862-3).
+
+Here, we are filtering out transcript isoforms with less than 5 reads in more
+than 5 samples. Additionally, we update the `genes` vector to match the new
+filtered matrix.
+
+```{r readfilter}
+tokeep <- rowSums(readcounts > 5) > 5
+
+readcounts <- readcounts[tokeep, ]
+genes      <- genes[tokeep]
+```
 
 ### Transcript diversity calculation
 
 We are going to use the `calculate_diversity` function to calculate two different
 types of transcript diversity.There are several mandatory and optional pamaters
-for the function.
+for the function. Even though we are using only a limited number of genes for
+a set of 40 samples, the analysis can be done using a full transcriptome
+annotation and much larger sample sets.
 
 * x - Input data, in various formats, discussed in more detail in the Input data
 structure and Data arrangement section.
@@ -318,28 +369,34 @@ entropy_significance <- calculate_difference(x = laplace_entropy, samples = "sam
 head(entropy_significance)
 ```
 
-The package sends a note about 16 genes, with low sample size, excluded from the
+The package sends a note about 11 genes, with low sample size, excluded from the
 analysis. as these genes had several NA diversity values, the result of 0
 expression values. You need at least 3 samples in each sample category and a
 total of 8 samples for a Wilcoxon test and at least 5 samples in each sample
 category for the label shuffling.
 
 Genes with a significant change in splicing diversity can be further analyzed
-and visualized by using e.g. MA-plots, where the log2 fold changes are shown on
-the y axis, and the mean diversity values on the x axis. Dots are colored red if
-the adjusted p-value is smaller than 0.05. It is recommended to filter for an
-absolute log2 fold change larger than 0.5 besides the adjusted p-value.
+and visualized by using e.g. MA-plots, where the log2 fold change or
+mean difference is shown on the y axis, and the mean diversity values on the x
+axis. Dots are colored red if the adjusted p-value is smaller than 0.05. It is
+recommended to filter for an absolute mean difference larger than 0.1 besides
+the adjusted p-value.
+
+The normalized naive and Laplace entropy, the Gini index, and the Simpson index
+are bounded in [0, 1], and we recommend using the mean or median difference when
+filtering for biologically meaningful changes. The non-normalized naive and
+Laplace entropy and the inverse Simpson index are not bounded in [0, 1], and the
+log2 fold change might give more useful results.
 
 ```{r}
-entropy_significance$label <- apply(entropy_significance[, c(5, 7)], 1,
-                                    function(x) ifelse(abs(x[1]) >= 0.5 & x[2] < 0.05,
+entropy_significance$label <- apply(entropy_significance[, c(4, 7)], 1,
+                                    function(x) ifelse(abs(x[1]) >= 0.1 & x[2] < 0.05,
                                                        "significant", "non-significant"))
 
 entropy_significance$mean <- apply(entropy_significance[, c(2, 3)], 1,
                                    function(x) (x[1] + x[2]) / 2)
 
-
-ggplot(entropy_significance, aes(x = mean, y = log2_fold_change)) +
+ggplot(entropy_significance, aes(x = mean, y = mean_difference)) +
   geom_point(color = "lightgrey", size = 1) +
   geom_point(data = entropy_significance[entropy_significance$label == "significant", ],
              color = "red", size = 1) +
@@ -347,26 +404,26 @@ ggplot(entropy_significance, aes(x = mean, y = log2_fold_change)) +
   labs(title = "Normalized Laplace entropy",
        subtitle = "Wilcoxon signed rank test",
        x = "Mean entropy",
-       y = "Log2(fold change)")
+       y = "Mean difference")
 ```
 
 The analyzed genes also can be visualized on a Volcano-plot, which shows the
-adjusted p-values of the genes on a logarithmic scale on the y axis and the log2
-fold change values between the two conditions on the x axis. We used a cutoff of
-0.5 and -0.5 for the log2 fold changes.
+adjusted p-values of the genes on a logarithmic scale on the y axis and the mean
+difference values between the two conditions on the x axis. We used a cutoff of
+0.1 and -0.1 for the mean difference.
 
 ```{r}
-ggplot(entropy_significance, aes(x = log2_fold_change,
+ggplot(entropy_significance, aes(x = mean_difference,
                                  y = -log10(adjusted_p_values),
                                  color = label)) +
   geom_point() +
   scale_color_manual(values = c("grey", "red"), guide = "none") +
   geom_hline(yintercept = -log10(0.05), color = "red") +
-  geom_vline(xintercept = c(0.5, -0.5)) +
+  geom_vline(xintercept = c(0.1, -0.1)) +
   theme_minimal() +
   labs(title = "Normalized Laplace entropy",
        subtitle = "Wilcoxon signed rank test",
-       x = "Log2 fold change of mean entropy values",
+       x = "Mean difference of entropy values",
        y = "-Log10(adjusted p-value")
 ```
 

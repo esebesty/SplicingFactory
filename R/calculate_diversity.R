@@ -171,6 +171,7 @@ calculate_diversity <- function(x, genes = NULL, method = "laplace", norm = TRUE
   result <- calculate_method(x, genes, method, norm, verbose = verbose)
 
   result_assay <- result[, -1, drop = FALSE]
+  rownames(result_assay) <- result[, 1]
   result_rowData <- data.frame(genes = result[, 1], row.names = result[, 1])
   result_colData <- data.frame(samples = colnames(x), row.names = colnames(x))
   result_metadata <- list(method = method, norm = norm)

@@ -18,9 +18,9 @@ if (!requireNamespace("BiocManager", quietly = TRUE))
 BiocManager::install("SplicingFactory")
 ```
 
-Alternatively can install the latest development version from github with:
+Alternatively, you can install the latest development version from github with:
 
 ```R
 install.packages("devtools")
-devtools::install_github("SU-CompBio/SplicingFactory")
+devtools::install_github("esebesty/SplicingFactory")
 ```

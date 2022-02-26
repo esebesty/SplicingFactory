@@ -1,3 +1,8 @@
+# SplicingFactory 1.3.1 (dev)
+
+* Citation update
+* Other minor corrections
+
 # SplicingFactory 1.0.3 (stable)
 
 * Bug fix for example data.

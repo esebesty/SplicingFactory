@@ -134,3 +134,47 @@ calculate_inverse_simpson <- function(x) {
     }
     return(x)
 }
+
+#' Calculate Tsallis entropy for a vector of transcript-level
+#' expression values of one gene.
+#'
+#' @param x Vector of expression values.
+#' @param q Tsallis entropy parameter. Default is 1 (standard entropy).
+#' @param norm If \code{TRUE}, the entropy values are normalized to the number
+#' of transcripts for each gene. The normalized entropy values are always
+#' between 0 and 1. If \code{FALSE}, genes cannot be compared to each other,
+#' due to possibly different maximum entropy values.
+#' @param pseudocount Pseudocount added to each transcript expression value.
+#' Default is 0, while Laplace entropy uses a pseudocount of 1.
+#' @export
+#' @return A single gene-level Tsallis entropy value.
+#' @details
+#' The function calculates Tsallis entropy, which is a generalization 
+#' of standard entropy. Given a vector of transcript-level expression values 
+#' of a gene, this function characterizes the diversity of splicing isoforms 
+#' for a gene. If there is only a single transcript, the diversity value 
+#' will be NaN, as it cannot be calculated. If the expression of the 
+#' given gene is 0, the diversity value will be NA.
+#' @examples
+#' # read counts for the transcripts of a single gene with 5 transcripts
+#' x <- rnbinom(5, size = 10, prob = 0.4)
+#' # calculate Tsallis entropy with q = 1 (normalized)
+#' tsallis_entropy <- calculate_tsallis_entropy(x, q = 1)
+calculate_tsallis_entropy <- function(x, q = 1, norm = TRUE, pseudocount = 0) {
+    if (sum(x) != 0 & length(x) > 1) {  # Verifica que la suma no sea cero y que haya más de un transcript
+        x <- (x + pseudocount) / sum(x + pseudocount)  # Normaliza los valores de expresión
+        x_q <- x^q  # Eleva los valores normalizados a la potencia q
+        
+        if (norm) {  # Calcula la entropía normalizada
+            tsallis_entropy <- (1 / (q - 1)) * (1 - sum(x_q))  # Cálculo de Tsallis sin normalizar
+            tsallis_entropy <- tsallis_entropy / (1 - (1 / length(x))^q)  # Normaliza la entropía
+        } else {  # Calcula la entropía sin normalización
+            tsallis_entropy <- (1 / (q - 1)) * (1 - sum(x_q))
+        }
+    } else if (length(x) == 1) {  # Si solo hay un transcript, retorna NaN
+        tsallis_entropy = NaN
+    } else {  # Si la expresión es 0, retorna NA
+        tsallis_entropy = NA
+    }
+    return(tsallis_entropy)  # Retorna el valor de la entropía de Tsallis
+}

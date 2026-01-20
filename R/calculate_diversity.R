@@ -45,7 +45,7 @@
 #'     values mean a more diverse set of transcripts for a gene.
 #'   \item Laplace entropy: Shannon entropy where the transcript frequencies are
 #'     replaced by a Bayesian estimate, using Laplace's prior.
-#'   \item Tsallis entropy: A generalization of Shannon entropy, parameterized by q (q > 0). For q → 1, Tsallis entropy converges to Shannon entropy. The default q is 2.
+#'   \item Tsallis entropy: A generalization of Shannon entropy, parameterized by q (q > 0). 
 #'     For q → 1, Tsallis entropy converges to Shannon entropy. The default q is 2.
 #'   \item Gini index: a measure of statistical dispersion originally used in
 #'     economy. This measurement ranges from 0 (complete equality) to 1

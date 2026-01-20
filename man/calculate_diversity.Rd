@@ -42,7 +42,7 @@ to use for diversity calculations.}
 
 \item{verbose}{If \code{TRUE}, the function will print additional diagnostic
 messages, besides the warnings and errors.}
-\item{q}{Tsallis entropy parameter (q > 0, q != 1). Can be a vector to compute multiple values at once. Only used if method = "tsallis". Default is 2.}
+\item{q}{Tsallis entropy parameter (q > 0). Can be a vector to compute multiple values at once. Only used if method = "tsallis". Default is 2.}
 }
 \value{
 Gene-level splicing diversity values in a \code{SummarizedExperiment}
@@ -70,7 +70,7 @@ include the following:
     values mean a more diverse set of transcripts for a gene.
   \item Laplace entropy: Shannon entropy where the transcript frequencies are
     replaced by a Bayesian estimate, using Laplace's prior.
-  \item Tsallis entropy: A generalization of Shannon entropy, parameterized by q (q > 0, q != 1).
+  \item Tsallis entropy: A generalization of Shannon entropy, parameterized by q (q > 0).
     For q → 1, Tsallis entropy converges to Shannon entropy. The default q is 2.
   \item Gini index: a measure of statistical dispersion originally used in
     economy. This measurement ranges from 0 (complete equality) to 1

@@ -261,7 +261,7 @@ annotation and much larger sample sets.
 structure and Data arrangement section.
 * genes - A vector with gene names used for aggregating the transcript level data.
 * method - Method to use for splicing diversity calculation.
-* q - Tsallis entropy parameter (q > 0, q != 1). Only used if method = "tsallis". Default is 2.
+* q - Tsallis entropy parameter (q > 0). Only used if method = "tsallis". Default is 2.
 * norm - If set to `TRUE`, the entropy values are normalized to the number of
 transcripts for each gene.
 * tpm - In the case of a tximport list, you might want set the `tpm` argument.

@@ -26,7 +26,7 @@ due to possibly different maximum entropy values.}
 
 \item{verbose}{If \code{TRUE}, the function will print additional diagnostic
 messages, besides the warnings and errors.}
-\item{q}{Tsallis entropy parameter (q > 0, q != 1). Can be a vector to compute multiple values at once. Only used if method = "tsallis". Default is 2.}
+\item{q}{Tsallis entropy parameter (q > 0). Can be a vector to compute multiple values at once. Only used if method = "tsallis". Default is 2.}
 }
 \value{
 Gene-level splicing diversity values in a \code{data.frame}, where

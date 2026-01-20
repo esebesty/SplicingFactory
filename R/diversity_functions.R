@@ -1,3 +1,52 @@
+#' Calculate Tsallis entropy for a vector of transcript-level
+#' expression values of one gene.
+#'
+#' @param x Vector of expression values.
+#' @param q Tsallis entropy parameter (q > 0, q != 1). Default is 2.
+#' @param norm If \code{TRUE}, the entropy values are normalized to the number
+#' of transcripts for each gene. The normalized entropy values are always
+#' between 0 and 1. If \code{FALSE}, genes cannot be compared to each other,
+#' due to possibly different maximum entropy values.
+#' @export
+#' @return A single gene-level Tsallis entropy value.
+#' @details
+#' The function calculates the Tsallis entropy, a generalization of Shannon entropy.
+#' For q → 1, Tsallis entropy converges to Shannon entropy.
+#' If there is only a single transcript, the value will be NaN.
+#' If the expression of the given gene is 0, the value will be NA.
+#' @examples
+#' x <- rnbinom(5, size = 10, prob = 0.4)
+#' tsallis <- calculate_tsallis_entropy(x, q = 2)
+calculate_tsallis_entropy <- function(x, q = 2, norm = TRUE) {
+    if (!is.numeric(q)) stop("q must be numeric.")
+    if (any(q <= 0)) stop("q must be greater than 0.")
+    if (sum(x) != 0 & length(x) > 1) {
+        p <- x / sum(x)
+        tsallis_vec <- vapply(q, function(qi) {
+            if (abs(qi - 1) < .Machine$double.eps^0.5) {
+                # q == 1, return Shannon entropy
+                shannon <- -sum(ifelse(p > 0, p * log(p), 0))
+                if (norm) {
+                    shannon <- shannon / log(length(x))
+                }
+                return(shannon)
+            } else {
+                tsallis <- (1 - sum(p^qi)) / (qi - 1)
+                if (norm) {
+                    max_tsallis <- (1 - length(x)^(1 - qi)) / (qi - 1)
+                    tsallis <- tsallis / max_tsallis
+                }
+                return(tsallis)
+            }
+        }, numeric(1))
+        names(tsallis_vec) <- paste0("q=", q)
+        return(tsallis_vec)
+    } else if (length(x) == 1) {
+        return(rep(NaN, length(q)))
+    } else {
+        return(rep(NA, length(q)))
+    }
+}
 #' Calculate entropy for a vector of transcript-level
 #' expression values of one gene.
 #'

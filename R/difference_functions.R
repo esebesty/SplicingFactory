@@ -1,3 +1,38 @@
+#' Compare Tsallis entropy across multiple q values between groups
+#'
+#' @param tsallis_matrix Matrix/data.frame: rows = genes/samples, columns = q values (e.g., q=1.1, q=1.5, ...)
+#' @param group Vector: group assignment for each sample
+#' @param paired Logical: whether samples are paired (default FALSE)
+#' @param blocks Optional: subject IDs for pairing (required if paired = TRUE)
+#' @param pcorr P-value correction method
+#' @return Raw and corrected p-values for difference across q values between groups
+#' @import stats
+compare_q_values <- function(tsallis_matrix, group, paired = FALSE, blocks = NULL, pcorr = "BH") {
+    # tsallis_matrix: samples x q values
+    if (!paired) {
+        # For each q, compare between groups (Wilcoxon)
+        pvals <- sapply(seq_len(ncol(tsallis_matrix)), function(j) {
+            wilcox.test(tsallis_matrix[group == unique(group)[1], j], tsallis_matrix[group == unique(group)[2], j])$p.value
+        })
+        adj_pvals <- p.adjust(pvals, method = pcorr)
+        return(data.frame(q = colnames(tsallis_matrix), raw_p = pvals, adj_p = adj_pvals))
+    } else {
+        # For paired/repeated measures, use Friedman test across q
+        if (is.null(blocks)) stop("blocks (subject IDs) required for paired analysis.")
+        # Reshape to long format: value, q, group, block
+        df <- data.frame(value = as.vector(tsallis_matrix),
+                        q = rep(colnames(tsallis_matrix), each = nrow(tsallis_matrix)),
+                        group = rep(group, times = ncol(tsallis_matrix)),
+                        block = rep(blocks, times = ncol(tsallis_matrix)))
+        # For each group, test across q
+        results <- lapply(unique(group), function(g) {
+            subdf <- df[df$group == g, ]
+            p <- friedman.test(value ~ q | block, data = subdf)$p.value
+            data.frame(group = g, raw_p = p, adj_p = p)
+        })
+        return(do.call(rbind, results))
+    }
+}
 #' Calculate splicing diversity changes between two conditions.
 #'
 #' @param x A \code{matrix} with the splicing diversity values.

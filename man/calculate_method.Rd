@@ -15,8 +15,8 @@ input dataset with transcript-level expression values. The values in
 \code{x} are grouped into genes based on this vector.}
 
 \item{method}{Method to use for splicing diversity calculation, including
-naive entropy (\code{naive}), Laplace entropy (\code{laplace}), Gini index
-(\code{gini}), Simpson index (\code{simpson}) and inverse Simpson index
+naive entropy (\code{naive}), Laplace entropy (\code{laplace}), Tsallis entropy (\code{tsallis}),
+Gini index (\code{gini}), Simpson index (\code{simpson}) and inverse Simpson index
 (\code{invsimpson}). The default method is Laplace entropy.}
 
 \item{norm}{If \code{TRUE}, the entropy values are normalized to the number
@@ -26,12 +26,13 @@ due to possibly different maximum entropy values.}
 
 \item{verbose}{If \code{TRUE}, the function will print additional diagnostic
 messages, besides the warnings and errors.}
+\item{q}{Tsallis entropy parameter (q > 0, q != 1). Can be a vector to compute multiple values at once. Only used if method = "tsallis". Default is 2.}
 }
 \value{
 Gene-level splicing diversity values in a \code{data.frame}, where
   each row belongs to a gene and each column belongs to a sample from the
   data, in addition to the first column, containing gene names, given in the
-  `genes` parameter.
+  `genes` parameter. If method = "tsallis" and q is a vector, columns are provided for each q and sample.
 }
 \description{
 Calculate diversity values for a matrix of transcripts.

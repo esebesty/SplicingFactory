@@ -1,3 +1,9 @@
+# SplicingFactory 1.3.2 (dev)
+
+* Added Tsallis entropy as a diversity metric, with full documentation and examples.
+* Users can now set the `q` parameter for Tsallis entropy in `calculate_diversity()` and `calculate_method()`.
+* Documentation and vignette updated to reflect this new feature.
+
 # SplicingFactory 1.3.1 (dev)
 
 * Citation update

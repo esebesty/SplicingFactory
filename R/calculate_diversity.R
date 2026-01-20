@@ -6,8 +6,8 @@
 #'   input dataset with transcript-level expression values. The values in
 #'   \code{x} are grouped into genes based on this vector.
 #' @param method Method to use for splicing diversity calculation, including
-#'   naive entropy (\code{naive}), Laplace entropy (\code{laplace}), Gini index
-#'   (\code{gini}), Simpson index (\code{simpson}) and inverse Simpson index
+#'   naive entropy (\code{naive}), Laplace entropy (\code{laplace}), Tsallis entropy (\code{tsallis}),
+#'   Gini index (\code{gini}), Simpson index (\code{simpson}) and inverse Simpson index
 #'   (\code{invsimpson}). The default method is Laplace entropy.
 #' @param norm If \code{TRUE}, the entropy values are normalized to the number
 #'   of transcripts for each gene. The normalized entropy values are always
@@ -21,6 +21,7 @@
 #'    to use for diversity calculations.
 #' @param verbose If \code{TRUE}, the function will print additional diagnostic
 #'    messages, besides the warnings and errors.
+#' @param q Tsallis entropy parameter (q > 0, q != 1). Only used if method = "tsallis". Default is 2.
 #' @return Gene-level splicing diversity values in a \code{SummarizedExperiment}
 #'    object.
 #' @import methods
@@ -44,6 +45,8 @@
 #'     values mean a more diverse set of transcripts for a gene.
 #'   \item Laplace entropy: Shannon entropy where the transcript frequencies are
 #'     replaced by a Bayesian estimate, using Laplace's prior.
+#'   \item Tsallis entropy: A generalization of Shannon entropy, parameterized by q (q > 0, q != 1).
+#'     For q → 1, Tsallis entropy converges to Shannon entropy. The default q is 2.
 #'   \item Gini index: a measure of statistical dispersion originally used in
 #'     economy. This measurement ranges from 0 (complete equality) to 1
 #'     (complete inequality). A value of 1 (complete inequality) means a single
@@ -73,7 +76,7 @@
 #' # calculating normalized Laplace entropy
 #' result <- calculate_diversity(x, gene, method = "laplace", norm = TRUE)
 calculate_diversity <- function(x, genes = NULL, method = "laplace", norm = TRUE,
-                                tpm = FALSE, assayno = 1, verbose = FALSE) {
+                                tpm = FALSE, assayno = 1, verbose = FALSE, q = 2) {
   if (!(is.matrix(x) || is.data.frame(x) || is.list(x) || is(x, "DGEList") ||
     is(x, "RangedSummarizedExperiment") || is(x, "SummarizedExperiment"))) {
     stop("Input data type is not supported! Please use `?calculate_diversity`
@@ -143,7 +146,7 @@ calculate_diversity <- function(x, genes = NULL, method = "laplace", norm = TRUE
     stop("The number of rows is not equal to the given gene set.", call. = FALSE)
   }
 
-  if (!(method %in% c("naive", "laplace", "gini", "simpson", "invsimpson"))) {
+  if (!(method %in% c("naive", "laplace", "tsallis", "gini", "simpson", "invsimpson"))) {
     stop("Invalid method. Please use `?calculate_diversity` to see the possible
          arguments and details.",
       call. = FALSE
@@ -168,13 +171,16 @@ calculate_diversity <- function(x, genes = NULL, method = "laplace", norm = TRUE
             have any effect on the calculation.", call. = FALSE)
   }
 
-  result <- calculate_method(x, genes, method, norm, verbose = verbose)
+  result <- calculate_method(x, genes, method, norm, verbose = verbose, q = q)
 
   result_assay <- result[, -1, drop = FALSE]
   rownames(result_assay) <- result[, 1]
   result_rowData <- data.frame(genes = result[, 1], row.names = result[, 1])
   result_colData <- data.frame(samples = colnames(x), row.names = colnames(x))
   result_metadata <- list(method = method, norm = norm)
+  if (method == "tsallis") {
+    result_metadata$q <- q
+  }
 
   result <- SummarizedExperiment(assays = list(diversity = result_assay),
                                  rowData = result_rowData,

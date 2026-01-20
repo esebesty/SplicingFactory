@@ -13,7 +13,7 @@ Description: The SplicingFactory R package uses transcript-level expression
     transcript isoform diversity within samples or between conditions.
     Additionally, the package analyzes the isoform diversity data, looking for
     significant changes between conditions.
-RoxygenNote: 7.1.1
+RoxygenNote: 7.3.3
 Imports: SummarizedExperiment, methods, stats
 Suggests:
     testthat,

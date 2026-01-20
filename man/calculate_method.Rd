@@ -4,7 +4,7 @@
 \alias{calculate_method}
 \title{Calculate diversity values for a matrix of transcripts.}
 \usage{
-calculate_method(x, genes, method, norm = TRUE, verbose = FALSE)
+calculate_method(x, genes, method, norm = TRUE, verbose = FALSE, q = 2)
 }
 \arguments{
 \item{x}{An input \code{matrix}, or \code{data.frame} containing
@@ -26,13 +26,14 @@ due to possibly different maximum entropy values.}
 
 \item{verbose}{If \code{TRUE}, the function will print additional diagnostic
 messages, besides the warnings and errors.}
-\item{q}{Tsallis entropy parameter (q > 0). Can be a vector to compute multiple values at once. Only used if method = "tsallis". Default is 2.}
+
+\item{q}{Tsallis entropy parameter (q > 0). Only used if method = "tsallis". Default is 2. If q = 1, the function returns the Shannon entropy.}
 }
 \value{
 Gene-level splicing diversity values in a \code{data.frame}, where
   each row belongs to a gene and each column belongs to a sample from the
   data, in addition to the first column, containing gene names, given in the
-  `genes` parameter. If method = "tsallis" and q is a vector, columns are provided for each q and sample.
+  `genes` parameter.
 }
 \description{
 Calculate diversity values for a matrix of transcripts.

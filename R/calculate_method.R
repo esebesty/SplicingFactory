@@ -13,7 +13,7 @@
 #'   of transcripts for each gene. The normalized entropy values are always
 #'   between 0 and 1. If \code{FALSE}, genes cannot be compared to each other,
 #'   due to possibly different maximum entropy values.
-#' @param q Tsallis entropy parameter (q > 0, q != 1). Only used if method = "tsallis". Default is 2.
+#' @param q Tsallis entropy parameter (q > 0). Only used if method = "tsallis". Default is 2. If q = 1, the function returns the Shannon entropy.
 #' @param verbose If \code{TRUE}, the function will print additional diagnostic
 #'   messages, besides the warnings and errors.
 #' @return Gene-level splicing diversity values in a \code{data.frame}, where

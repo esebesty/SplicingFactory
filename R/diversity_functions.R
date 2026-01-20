@@ -14,9 +14,11 @@
 #' For q → 1, Tsallis entropy converges to Shannon entropy.
 #' If there is only a single transcript, the value will be NaN.
 #' If the expression of the given gene is 0, the value will be NA.
-#' @examples
-#' x <- rnbinom(5, size = 10, prob = 0.4)
-#' tsallis <- calculate_tsallis_entropy(x, q = 2)
+##' @examples
+##' x <- rnbinom(5, size = 10, prob = 0.4)
+##' tsallis <- calculate_tsallis_entropy(x, q = 2)
+##'
+##' @param q Tsallis entropy parameter (q > 0). Can be a single value or a numeric vector. Default is 2. If q = 1, the function returns the Shannon entropy.
 calculate_tsallis_entropy <- function(x, q = 2, norm = TRUE) {
     if (!is.numeric(q)) stop("q must be numeric.")
     if (any(q <= 0)) stop("q must be greater than 0.")

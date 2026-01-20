@@ -1,12 +1,3 @@
-#' Compare Tsallis entropy across multiple q values between groups
-#'
-#' @param tsallis_matrix Matrix/data.frame: rows = genes/samples, columns = q values (e.g., q=1.1, q=1.5, ...)
-#' @param group Vector: group assignment for each sample
-#' @param paired Logical: whether samples are paired (default FALSE)
-#' @param blocks Optional: subject IDs for pairing (required if paired = TRUE)
-#' @param pcorr P-value correction method
-#' @return Raw and corrected p-values for difference across q values between groups
-#' @import stats
 #' Calculate splicing diversity changes between two conditions.
 #'
 #' @param x A \code{matrix} with the splicing diversity values.

@@ -1,22 +1,3 @@
-test_that("Tsallis entropy calculation is working", {
-    read_counts <- c(0, 0, 5, 4, 1)
-    tsallis_entropy <- calculate_tsallis_entropy(read_counts, q = 2)
-    expect_true(is.numeric(tsallis_entropy))
-    expect_length(tsallis_entropy, 1)
-    # For q=2, expected value can be calculated manually
-    # p = c(0,0,0.5,0.4,0.1), sum(p^2) = 0.25+0.16+0.01=0.42, (1-0.42)/(2-1)=0.58
-    expect_equal(tsallis_entropy, 0.58, tolerance = 0.001, scale = 1)
-    tsallis_entropy_norm <- calculate_tsallis_entropy(read_counts, q = 2, norm = FALSE)
-    expect_true(is.numeric(tsallis_entropy_norm))
-    expect_length(tsallis_entropy_norm, 1)
-    expect_equal(tsallis_entropy_norm, 0.58, tolerance = 0.001, scale = 1)
-    # q=1 should error
-    expect_error(calculate_tsallis_entropy(read_counts, q = 1))
-    # Single isoform
-    expect_true(is.nan(calculate_tsallis_entropy(c(1), q = 2)))
-    # Zero expression
-    expect_true(is.na(calculate_tsallis_entropy(c(0,0), q = 2)))
-})
 context("Basic diversity calculations")
 
 test_that("Basic diversity calculation is working", {
@@ -85,4 +66,24 @@ test_that("Diversity calculation of zero expression", {
 
     expect_true(is.na(naive_entropy_zero))
 
+})
+
+test_that("Tsallis entropy calculation is working", {
+    read_counts <- c(0, 0, 5, 4, 1)
+    tsallis_entropy <- calculate_tsallis_entropy(read_counts, q = 2)
+    expect_true(is.numeric(tsallis_entropy))
+    expect_length(tsallis_entropy, 1)
+    # For q=2, expected value can be calculated manually
+    # p = c(0,0,0.5,0.4,0.1), sum(p^2) = 0.25+0.16+0.01=0.42, (1-0.42)/(2-1)=0.58
+    expect_equal(tsallis_entropy, 0.58, tolerance = 0.001, scale = 1)
+    tsallis_entropy_norm <- calculate_tsallis_entropy(read_counts, q = 2, norm = FALSE)
+    expect_true(is.numeric(tsallis_entropy_norm))
+    expect_length(tsallis_entropy_norm, 1)
+    expect_equal(tsallis_entropy_norm, 0.58, tolerance = 0.001, scale = 1)
+    # q=1 should error
+    expect_error(calculate_tsallis_entropy(read_counts, q = 1))
+    # Single isoform
+    expect_true(is.nan(calculate_tsallis_entropy(c(1), q = 2)))
+    # Zero expression
+    expect_true(is.na(calculate_tsallis_entropy(c(0,0), q = 2)))
 })

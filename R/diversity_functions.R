@@ -164,9 +164,9 @@ calculate_tsallis_entropy <- function(x, q = 2, norm = TRUE) {
         tsallis_vec <- vapply(q, function(qi) {
             if (abs(qi - 1) < .Machine$double.eps^0.5) {
                 # q == 1, return Shannon entropy
-                shannon <- -sum(ifelse(p > 0, p * log(p), 0))
+                shannon <- -sum(ifelse(p > 0, p * log2(p), 0))
                 if (norm) {
-                    shannon <- shannon / log(length(x))
+                    shannon <- shannon / log2(length(x))
                 }
                 return(shannon)
             } else {
@@ -178,8 +178,12 @@ calculate_tsallis_entropy <- function(x, q = 2, norm = TRUE) {
                 return(tsallis)
             }
         }, numeric(1))
-        names(tsallis_vec) <- paste0("q=", q)
-        return(tsallis_vec)
+        if (length(q) == 1) {
+            return(unname(tsallis_vec))
+        } else {
+            names(tsallis_vec) <- paste0("q=", q)
+            return(tsallis_vec)
+        }
     } else if (length(x) == 1) {
         return(rep(NaN, length(q)))
     } else {

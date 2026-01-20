@@ -49,7 +49,7 @@ test_that("calculate_diversity supports q as a vector and returns correct metada
         expect_true(any(grepl(paste0("q=", qi), assay_names)))
     }
     # Metadata should contain the q vector
-    expect_equal(metadata(result)$q, qvec)
+    expect_equal(S4Vectors::metadata(result)$q, qvec)
 })
 test_that("calculate_diversity passes q parameter for Tsallis entropy", {
     x <- matrix(c(0, 0, 5, 4, 1, 2, 2, 2, 2, 2), ncol = 2)

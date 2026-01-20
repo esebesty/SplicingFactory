@@ -45,7 +45,16 @@ calculate_method <- function(x, genes, method, norm = TRUE, verbose = FALSE, q =
         gene_names <- x_list[[1]]
         value_cols <- x_list[-1]
         # For each sample, build a matrix genes x q
-        out_list <- lapply(value_cols, function(col) do.call(rbind, col))
+        out_list <- lapply(value_cols, function(col) {
+            # If col is a list, rbind; if not, wrap in list
+            if (is.list(col) && all(sapply(col, is.atomic))) {
+                do.call(rbind, col)
+            } else if (is.atomic(col)) {
+                matrix(col, nrow = 1)
+            } else {
+                do.call(rbind, as.list(col))
+            }
+        })
         # If only one q, keep as vector
         if (length(q) == 1) {
             for (i in seq_along(out_list)) {

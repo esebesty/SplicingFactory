@@ -176,16 +176,26 @@ calculate_diversity <- function(x, genes = NULL, method = "laplace", norm = TRUE
   result_assay <- result[, -1, drop = FALSE]
   rownames(result_assay) <- result[, 1]
   result_rowData <- data.frame(genes = result[, 1], row.names = result[, 1])
-  result_colData <- data.frame(samples = colnames(x), row.names = colnames(x))
+  # Expand colData to match assay columns if needed (for tsallis with q as vector)
+  if (method == "tsallis" && length(q) > 1) {
+    # colnames(result_assay) are like Sample1_q=1.1, Sample2_q=1.1, ...
+    col_split <- do.call(rbind, strsplit(colnames(result_assay), "_q="))
+    result_colData <- data.frame(
+      samples = col_split[, 1],
+      q = as.numeric(col_split[, 2]),
+      row.names = colnames(result_assay),
+      stringsAsFactors = FALSE
+    )
+  } else {
+    result_colData <- data.frame(samples = colnames(x), row.names = colnames(x))
+  }
   result_metadata <- list(method = method, norm = norm)
   if (method == "tsallis") {
     result_metadata$q <- q
   }
-
   result <- SummarizedExperiment(assays = list(diversity = result_assay),
                                  rowData = result_rowData,
                                  colData = result_colData,
                                  metadata = result_metadata)
-
   return(result)
 }

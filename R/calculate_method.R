@@ -36,40 +36,28 @@ calculate_method <- function(x, genes, method, norm = TRUE, verbose = FALSE, q =
     }
 
     if (method == "tsallis") {
-        # For q as a vector, aggregate returns a matrix for each gene/sample
-        x_list <- aggregate(x, by = list(genes), calculate_tsallis_entropy, norm = norm, q = q)
-        # x_list is a data.frame, but the value columns are lists of named vectors
-        # Convert to a data.frame with columns for each q
-        qnames <- paste0("q=", q)
-        # For each sample (column), extract a matrix of values for all genes and all q
-        gene_names <- x_list[[1]]
-        value_cols <- x_list[-1]
-        # For each sample, build a matrix genes x q
-        out_list <- lapply(value_cols, function(col) {
-            # If col is a list, rbind; if not, wrap in list
-            if (is.list(col) && all(sapply(col, is.atomic))) {
-                do.call(rbind, col)
-            } else if (is.atomic(col)) {
-                matrix(col, nrow = 1)
-            } else {
-                do.call(rbind, as.list(col))
-            }
-        })
-        # If only one q, keep as vector
-        if (length(q) == 1) {
-            for (i in seq_along(out_list)) {
-                out_list[[i]] <- as.vector(out_list[[i]])
-                names(out_list[[i]]) <- NULL
-            }
-            out_df <- data.frame(Gene = gene_names, do.call(cbind, out_list), check.names = FALSE)
-        } else {
-            # For multiple q, flatten to wide format: one row per gene, columns for each sample/q
-            out_df <- data.frame(Gene = gene_names)
-            for (s in seq_along(out_list)) {
-                mat <- out_list[[s]]
-                colnames(mat) <- paste0(colnames(x)[s], "_", qnames)
-                out_df <- cbind(out_df, mat)
-            }
+        # It is not possible to use aggregate here, because it expect to return
+        # a single value per group, but calculate_tsallis_entropy can return
+        # multiple values (if length(q) > 1)
+        gene_levels <- unique(genes)
+        coln <- as.vector(outer(colnames(x), q, function(s, qq) paste0(s, "_q=", qq)))
+        rown <- gene_levels
+        tsallis_row <- function(gene) {
+            idx <- which(genes == gene)
+            unlist(lapply(seq_len(ncol(x)), function(j) {
+                v <- calculate_tsallis_entropy(x[idx, j], q = q, norm = norm)
+                if (length(v) == length(q) && all(is.finite(v) | is.na(v))) v else setNames(rep(NA_real_, length(q)), paste0("q=", q))
+            }))
+        }
+        result_mat <- t(vapply(gene_levels, tsallis_row, FUN.VALUE = setNames(numeric(length(coln)), coln)))
+        colnames(result_mat) <- coln
+        rownames(result_mat) <- rown
+        out_df <- data.frame(Gene = rown, result_mat, check.names = FALSE)
+        if (all(rowSums(!is.na(result_mat)) == 0)) {
+            out_df <- data.frame(Gene=character(0))
+            for (nm in coln) out_df[[nm]] <- numeric(0)
+            x <- out_df
+            return(x)
         }
         x <- out_df
     }

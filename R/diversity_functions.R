@@ -187,6 +187,6 @@ calculate_tsallis_entropy <- function(x, q = 2, norm = TRUE) {
     } else if (length(x) == 1) {
         return(rep(NaN, length(q)))
     } else {
-        return(rep(NA, length(q)))
+        return(rep(NA_real_, length(q)))
     }
 }

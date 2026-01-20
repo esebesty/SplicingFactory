@@ -224,6 +224,7 @@ library("ggplot2")
 # Construct data.frame from SummarizedExperiment result
 laplace_data <- cbind(assay(laplace_entropy),
                       Gene = rowData(laplace_entropy)$genes)
+laplace_data <- as.data.frame(laplace_data)
 
 # Reshape data.frame
 laplace_data <- pivot_longer(laplace_data, -Gene, names_to = "sample",
@@ -243,6 +244,7 @@ laplace_data$diversity <-  "Normalized Laplace entropy"
 
 # Construct data.frame from SummarizedExperiment result
 gini_data <- cbind(assay(gini_index), Gene = rowData(gini_index)$genes)
+gini_data <- as.data.frame(gini_data)
 
 # Reshape data.frame
 gini_data <- pivot_longer(gini_data, -Gene, names_to = "sample",
@@ -273,6 +275,7 @@ ggplot() +
   labs(x = "Diversity values",
        y = "Density")
 
+laplace_data$entropy <- as.numeric(laplace_data$entropy)
 # Mean entropy calculation across samples for each gene/sample type combination
 laplace_entropy_mean <- aggregate(laplace_data$entropy,
                                   by = list(laplace_data$Gene), mean)
@@ -287,6 +290,7 @@ laplace_entropy_mean$sample_type <- apply(laplace_entropy_mean[, 1], 1,
 # Add diversity type column
 laplace_entropy_mean$diversity <-  "Normalized Laplace entropy"
 
+gini_data$gini <- as.numeric(gini_data$gini)
 # Mean gini calculation across samples for each gene/sample type combination
 gini_mean <- aggregate(gini_data$gini, by = list(gini_data$Gene), mean)
 colnames(gini_mean)[2] <- "mean_gini"
@@ -429,12 +433,46 @@ ggplot(entropy_significance, aes(x = mean_difference,
        y = "-Log10(adjusted p-value")
 ```
 
-## Visualizing Tsallis entropy results with multiple q and groups
 
-Suppose you have sample groups (e.g., Normal vs Tumor) encoded in your sample names (e.g., "Sample1_Normal", "Sample2_Tumor").
-Here are two recommended ways to visualize Tsallis entropy for multiple q values and groups:
+### Visualizing Tsallis entropy
 
-### Violin/boxplot by q and group
+Tsallis entropy is a flexible diversity measure that depends on the parameter
+$q$, allowing you to tune sensitivity to rare or abundant isoforms. By 
+calculating Tsallis entropy for a range of $q$ values, you can visualize 
+how transcript diversity changes as $q$ varies, and compare patterns between 
+biological groups (e.g., Normal vs Tumor).
+
+The following code demonstrates how to compute Tsallis entropy for multiple 
+$q$ values.
+
+First we will prepare the data for visualization by calculating Tsallis entropy 
+for each gene and sample at two different q values, 0.1 and 5, which requires 
+reshaping the data into a tidy long-format data frame, suitable for ggplot2. 
+A low $q$ value like 0.1 makes the entropy highly sensitive to rare isoforms, 
+highlighting diversity contributed by low-abundance transcripts. A high $q$ 
+value like 5 emphasizes the contribution of the most abundant isoforms, 
+effectively down-weighting rare ones.
+
+```{r tsallis-qvec-long-prepare, message=FALSE}
+# Calculate Tsallis entropy for two q values
+qvec <- c(0.1, 5)
+tsallis_se <- calculate_diversity(readcounts, genes, method = "tsallis", q = qvec, norm = TRUE)
+tsallis_df <- as.data.frame(assay(tsallis_se))
+tsallis_df$Gene <- rowData(tsallis_se)$genes
+
+# Reshape to long format and separate sample and q value
+library(tidyr)
+library(dplyr)
+tsallis_long <- tidyr::pivot_longer(tsallis_df, -Gene, names_to = "sample_q", values_to = "tsallis")
+tsallis_long <- tidyr::separate(tsallis_long, sample_q, into = c("sample", "q"), sep = "_q=")
+tsallis_long$q <- as.numeric(tsallis_long$q)
+tsallis_qvec_long <- dplyr::filter(tsallis_long, !is.na(tsallis))
+head(tsallis_qvec_long)
+```
+
+Now we will create a violin/boxplot to visualize the distribution of Tsallis 
+entropy values.
+
 ```{r tsallis-violin-multq}
 library(dplyr)
 # Extract group from sample name (assuming format Sample_Group)
@@ -444,17 +482,71 @@ ggplot(tsallis_qvec_long, aes(x = q, y = tsallis, fill = group)) +
   geom_violin(alpha = 0.5, position = position_dodge(width = 0.8)) +
   geom_boxplot(width = 0.2, position = position_dodge(width = 0.8), outlier.shape = NA) +
   theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5)) +
   labs(title = "Tsallis entropy by q and group", x = "q value", y = "Tsallis entropy", fill = "Group")
 ```
 
-### Faceted density plot by q, colored by group
+An alternative visualization is to plot the density distributions of Tsallis,
+which can help to see how the overall distribution of entropy values shifts
+between groups and q values.
 ```{r tsallis-density-multq}
 ggplot(tsallis_qvec_long, aes(x = tsallis, color = group, fill = group)) +
   geom_density(alpha = 0.3) +
   facet_wrap(~q, scales = "free_y") +
   theme_minimal() +
-  labs(title = "Tsallis entropy distributions by q and group", x = "Tsallis entropy", y = "Density", color = "Group", fill = "Group")
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(title = "Tsallis entropy distributions by q and group", 
+  x = "Tsallis entropy", y = "Density", color = "Group", fill = "Group")
 ```
+
+Finally, we can analyze de values of Tsallis entropy change across a range of 
+$q$ values for each group. By showing both the median diversity and its spread 
+as $q$ varies, this kind of plot could reveal how differences in splicing 
+diversity between groups depend on the sensitivity to rare versus abundant 
+isoforms. Using the median and interquartile range (IQR) effectively analyzes 
+gene expression data, offering a clear view of central tendency and variability, 
+particularly in the presence of outliers.
+
+```{r tsallis-q-curve-mean-sd, message=FALSE}
+# Rango de valores q
+q_values <- seq(0.5, 1.5, by = 0.01)
+
+# Function to calculate group statistics using median and IQR
+get_group_stats_iqr <- function(q) {
+  tsallis_df <- as.data.frame(mapply(
+    function(sample_col) {
+      tapply(readcounts[, sample_col], genes, calculate_tsallis_entropy, q = q, norm = TRUE)
+    },
+    sample_col = seq_len(ncol(readcounts))
+  ))
+  
+  colnames(tsallis_df) <- colnames(readcounts)
+  tsallis_df$Gene <- rownames(tsallis_df)
+  
+  tsallis_long <- tidyr::pivot_longer(tsallis_df, -Gene, names_to = "sample", values_to = "tsallis") %>%
+    mutate(group = ifelse(grepl("_N$", sample), "Normal", "Tumor"))
+    
+  tsallis_long %>%
+    group_by(group) %>%
+    summarise(median = median(tsallis, na.rm = TRUE), 
+              IQR = IQR(tsallis, na.rm = TRUE), .groups = 'drop') %>%
+    mutate(q = q)
+}
+
+# Calculate statistics for all q values
+stats_df <- bind_rows(lapply(q_values, get_group_stats_iqr))
+
+# Plot the results
+ggplot(stats_df, aes(x = q, y = median, color = group, fill = group)) +
+  geom_line(linewidth = 1) +
+  geom_ribbon(aes(ymin = median - IQR/2, ymax = median + IQR/2), alpha = 0.2, color = NA) +
+    theme_minimal() +
+    theme(plot.title = element_text(hjust = 0.5)) +
+    labs(title = "Median ± IQR of Tsallis entropy by group",
+      x = "q value", y = "Median Tsallis entropy", color = "Group", fill = "Group")
+
+```
+
 
 ## Session info
 ```{r}

@@ -173,29 +173,37 @@ calculate_diversity <- function(x, genes = NULL, method = "laplace", norm = TRUE
 
   result <- calculate_method(x, genes, method, norm, verbose = verbose, q = q)
 
+  # Prepare assay and row/col data
   result_assay <- result[, -1, drop = FALSE]
-  rownames(result_assay) <- result[, 1]
   result_rowData <- data.frame(genes = result[, 1], row.names = result[, 1])
-  # Expand colData to match assay columns if needed (for tsallis with q as vector)
+
   if (method == "tsallis" && length(q) > 1) {
-    # colnames(result_assay) are like Sample1_q=1.1, Sample2_q=1.1, ...
-    col_split <- do.call(rbind, strsplit(colnames(result_assay), "_q="))
+    col_split <- do.call(rbind, strsplit(colnames(result)[-1], "_q="))
+    col_ids <- paste0(col_split[,1], "_q=", col_split[,2])
+    row_ids <- as.character(result[, 1])
     result_colData <- data.frame(
-      samples = col_split[, 1],
+      samples = as.character(col_split[, 1]),
       q = as.numeric(col_split[, 2]),
-      row.names = colnames(result_assay),
+      row.names = col_ids,
       stringsAsFactors = FALSE
     )
+    colnames(result_assay) <- col_ids
+    rownames(result_assay) <- row_ids
   } else {
-    result_colData <- data.frame(samples = colnames(x), row.names = colnames(x))
+    col_ids <- colnames(x)
+    row_ids <- as.character(result[, 1])
+    result_colData <- data.frame(samples = col_ids, row.names = col_ids)
+    colnames(result_assay) <- col_ids
+    rownames(result_assay) <- row_ids
   }
+
   result_metadata <- list(method = method, norm = norm)
-  if (method == "tsallis") {
-    result_metadata$q <- q
-  }
-  result <- SummarizedExperiment(assays = list(diversity = result_assay),
-                                 rowData = result_rowData,
-                                 colData = result_colData,
-                                 metadata = result_metadata)
-  return(result)
+  if (method == "tsallis") result_metadata$q <- q
+
+  SummarizedExperiment(
+    assays = list(diversity = result_assay),
+    rowData = result_rowData,
+    colData = result_colData,
+    metadata = result_metadata
+  )
 }

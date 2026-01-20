@@ -1,36 +1,3 @@
-  ## Visualizing Tsallis entropy results with multiple q and groups
-
-  Suppose you have sample groups (e.g., Normal vs Tumor) encoded in your sample names (e.g., "Sample1_Normal", "Sample2_Tumor").
-  Here are two recommended ways to visualize Tsallis entropy for multiple q values and groups:
-
-  ### Violin/boxplot by q and group
-  ```{r tsallis-violin-multq}
-  library(dplyr)
-  # Extract group from sample name (assuming format Sample_Group)
-  tsallis_qvec_long$group <- sub(".*_", "", tsallis_qvec_long$sample)
-  tsallis_qvec_long$q <- as.factor(tsallis_qvec_long$q)
-  ggplot(tsallis_qvec_long, aes(x = q, y = tsallis, fill = group)) +
-    geom_violin(alpha = 0.5, position = position_dodge(width = 0.8)) +
-    geom_boxplot(width = 0.2, position = position_dodge(width = 0.8), outlier.shape = NA) +
-    theme_minimal() +
-    labs(title = "Tsallis entropy by q and group", x = "q value", y = "Tsallis entropy", fill = "Group")
-  ```
-
-  ### Faceted density plot by q, colored by group
-  ```{r tsallis-density-multq}
-  ggplot(tsallis_qvec_long, aes(x = tsallis, color = group, fill = group)) +
-    geom_density(alpha = 0.3) +
-    facet_wrap(~q, scales = "free_y") +
-    theme_minimal() +
-    labs(title = "Tsallis entropy distributions by q and group", x = "Tsallis entropy", y = "Density", color = "Group", fill = "Group")
-  ```
-
-  ## Example output
-
-  - The violin/boxplot will show, for each $q$ value, the distribution of Tsallis entropy for each group side by side. You can easily compare medians, spread, and outliers between groups and across $q$ values.
-  - The faceted density plot will show, for each $q$, the full distribution of Tsallis entropy for each group, making it easy to see shifts, overlaps, or changes in distribution shape as $q$ varies.
-
-  These visualizations help researchers evaluate how the choice of $q$ affects biological contrasts and the interpretability of Tsallis entropy in their data.
 ---
 title: "SplicingFactory"
 author: "Péter Szikora, Tamás Pór, Endre Sebestyén"
@@ -45,67 +12,7 @@ abstract: >
   provides the ability to generate gene-level Shannon-entropy values and other
   diversity measures, such as the Gini-, Simpson-, or Tsallis-entropy index. These measures can
   quantify transcript isoform diversity within samples or between conditions.
-  ## Tsallis entropy
-
-  Tsallis entropy is a generalization of Shannon entropy, parameterized by $q$ (with $q > 0$, $q \neq 1$). For $q \to 1$, Tsallis entropy converges to Shannon entropy. The default value for $q$ in SplicingFactory is 2.
-
-  You can calculate Tsallis entropy for a gene as follows:
-
-  ```{r tsallis-example}
-  read_counts <- c(0, 0, 5, 4, 1)
-  tsallis_entropy <- calculate_tsallis_entropy(read_counts, q = 2)
-  tsallis_entropy
-  ```
-
-  You can also use the `method = "tsallis"` option in `calculate_diversity`:
-
-  ```{r tsallis-diversity}
-  result <- calculate_diversity(x, gene, method = "tsallis", norm = TRUE)
-  ```
-
-  You can set the `q` parameter to any value greater than 0 and not equal to 1:
-
-  ```{r tsallis-q15}
-  result_q15 <- calculate_diversity(x, gene, method = "tsallis", norm = TRUE, q = 1.5)
-  ```
-
-  You can also provide a vector of q values to compute multiple Tsallis entropies at once:
-
-  ```{r tsallis-qvec}
-  result_qvec <- calculate_diversity(x, gene, method = "tsallis", norm = TRUE, q = c(1.1, 1.5, 2))
-  # The assay will have columns for each q and sample
-  head(assay(result_qvec))
-  # The q values are stored in the metadata
-  metadata(result_qvec)$q
-  ```
-
-  ## Visualizing Tsallis entropy results
-
-  ### Density plot for a single q value
-  ```{r tsallis-plot-singleq}
-  library(ggplot2)
-  tsallis_data <- as.data.frame(assay(result))
-  tsallis_data$Gene <- rowData(result)$genes
-  tsallis_long <- tidyr::pivot_longer(tsallis_data, -Gene, names_to = "sample", values_to = "tsallis")
-  ggplot(tsallis_long, aes(x = tsallis, color = sample)) +
-    geom_density(alpha = 0.3) +
-    theme_minimal() +
-    labs(title = "Tsallis entropy (q = 2)", x = "Tsallis entropy", y = "Density")
-  ```
-
-  ### Density plot for multiple q values
-  ```{r tsallis-plot-multq}
-  tsallis_qvec_data <- as.data.frame(assay(result_qvec))
-  tsallis_qvec_data$Gene <- rowData(result_qvec)$genes
-  tsallis_qvec_long <- tidyr::pivot_longer(tsallis_qvec_data, -Gene, names_to = "sample_q", values_to = "tsallis")
-  # Extract q and sample from column names
-  tsallis_qvec_long$q <- sub(".*q=", "", tsallis_qvec_long$sample_q)
-  tsallis_qvec_long$sample <- sub("_q=.*", "", tsallis_qvec_long$sample_q)
-  ggplot(tsallis_qvec_long, aes(x = tsallis, color = q)) +
-    geom_density(alpha = 0.3) +
-    theme_minimal() +
-    labs(title = "Tsallis entropy for multiple q", x = "Tsallis entropy", y = "Density", color = "q value")
-  ```
+  
   Additionally, the package analyzes the isoform diversity data, looking for
   significant changes between conditions. A basic task during analysis is to use
   read counts or TPM to calculate a diversity measure and then perform a
@@ -520,6 +427,33 @@ ggplot(entropy_significance, aes(x = mean_difference,
        subtitle = "Wilcoxon signed rank test",
        x = "Mean difference of entropy values",
        y = "-Log10(adjusted p-value")
+```
+
+## Visualizing Tsallis entropy results with multiple q and groups
+
+Suppose you have sample groups (e.g., Normal vs Tumor) encoded in your sample names (e.g., "Sample1_Normal", "Sample2_Tumor").
+Here are two recommended ways to visualize Tsallis entropy for multiple q values and groups:
+
+### Violin/boxplot by q and group
+```{r tsallis-violin-multq}
+library(dplyr)
+# Extract group from sample name (assuming format Sample_Group)
+tsallis_qvec_long$group <- sub(".*_", "", tsallis_qvec_long$sample)
+tsallis_qvec_long$q <- as.factor(tsallis_qvec_long$q)
+ggplot(tsallis_qvec_long, aes(x = q, y = tsallis, fill = group)) +
+  geom_violin(alpha = 0.5, position = position_dodge(width = 0.8)) +
+  geom_boxplot(width = 0.2, position = position_dodge(width = 0.8), outlier.shape = NA) +
+  theme_minimal() +
+  labs(title = "Tsallis entropy by q and group", x = "q value", y = "Tsallis entropy", fill = "Group")
+```
+
+### Faceted density plot by q, colored by group
+```{r tsallis-density-multq}
+ggplot(tsallis_qvec_long, aes(x = tsallis, color = group, fill = group)) +
+  geom_density(alpha = 0.3) +
+  facet_wrap(~q, scales = "free_y") +
+  theme_minimal() +
+  labs(title = "Tsallis entropy distributions by q and group", x = "Tsallis entropy", y = "Density", color = "Group", fill = "Group")
 ```
 
 ## Session info

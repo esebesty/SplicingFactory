@@ -225,7 +225,6 @@ library("ggplot2")
 # Construct data.frame from SummarizedExperiment result
 laplace_data <- cbind(assay(laplace_entropy),
                       Gene = rowData(laplace_entropy)$genes)
-laplace_data <- as.data.frame(laplace_data)
 
 # Reshape data.frame
 laplace_data <- pivot_longer(laplace_data, -Gene, names_to = "sample",
@@ -245,7 +244,6 @@ laplace_data$diversity <-  "Normalized Laplace entropy"
 
 # Construct data.frame from SummarizedExperiment result
 gini_data <- cbind(assay(gini_index), Gene = rowData(gini_index)$genes)
-gini_data <- as.data.frame(gini_data)
 
 # Reshape data.frame
 gini_data <- pivot_longer(gini_data, -Gene, names_to = "sample",
@@ -276,7 +274,6 @@ ggplot() +
   labs(x = "Diversity values",
        y = "Density")
 
-laplace_data$entropy <- as.numeric(laplace_data$entropy)
 # Mean entropy calculation across samples for each gene/sample type combination
 laplace_entropy_mean <- aggregate(laplace_data$entropy,
                                   by = list(laplace_data$Gene), mean)
@@ -291,7 +288,6 @@ laplace_entropy_mean$sample_type <- apply(laplace_entropy_mean[, 1], 1,
 # Add diversity type column
 laplace_entropy_mean$diversity <-  "Normalized Laplace entropy"
 
-gini_data$gini <- as.numeric(gini_data$gini)
 # Mean gini calculation across samples for each gene/sample type combination
 gini_mean <- aggregate(gini_data$gini, by = list(gini_data$Gene), mean)
 colnames(gini_mean)[2] <- "mean_gini"

@@ -445,7 +445,8 @@ entropy as a function of $q$, group, and their interaction:
 ```{r tsallis-lm-q-continuous, message=FALSE}
 # Prepare long-format data for all genes
 qvec <- seq(0.1, 3, by = 0.01)
-tsallis_se <- calculate_diversity(readcounts, genes, method = "tsallis", q = qvec, norm = TRUE)
+tsallis_se <- calculate_diversity(readcounts, genes, method = "tsallis", 
+                                  q = qvec, norm = TRUE)
 tsallis_mat <- assay(tsallis_se) # genes x (samples_q)
 all_lm_results <- list()
 for (gene1 in rownames(tsallis_mat)) {
@@ -454,7 +455,8 @@ for (gene1 in rownames(tsallis_mat)) {
   sample_names <- sub("_q=.*", "", sample_q)
   q_vals <- as.numeric(sub(".*_q=", "", sample_q))
   group <- ifelse(grepl("_N$", sample_names), "Normal", "Tumor")
-  df <- data.frame(entropy = as.numeric(gene1_vals[1,]), q = q_vals, group = factor(group))
+  df <- data.frame(entropy = as.numeric(gene1_vals[1,]), q = q_vals, 
+                   group = factor(group))
   # Only fit if enough non-NA values
   if (sum(!is.na(df$entropy)) >= 10 && length(unique(df$group)) == 2) {
     # Fit linear model: entropy ~ q * group
@@ -469,10 +471,12 @@ if (length(all_lm_results) > 0) {
   lm_results_df <- lm_results_df[order(lm_results_df$p_interaction), ]
   rownames(lm_results_df) <- NULL
   # Adjust p-values for multiple testing (Benjamini-Hochberg FDR)
-  lm_results_df$adj_p_interaction <- p.adjust(lm_results_df$p_interaction, method = "BH")
+  lm_results_df$adj_p_interaction <- p.adjust(lm_results_df$p_interaction, 
+                                              method = "BH")
   print(head(lm_results_df, 10))
   cat("\nSummary: Number of genes tested:", nrow(lm_results_df), "\n")
-  cat("p_interaction tests whether the effect of q on Tsallis entropy differs between groups.\n")
+  cat("p_interaction tests whether the effect of q on Tsallis entropy differs 
+      between groups.\n")
 } else {
   cat("No genes with enough data for modeling.\n")
 }
@@ -495,13 +499,16 @@ abundant isoforms, down-weighting the contribution of rare ones.
 
 # Calculate Tsallis entropy for two q values
 qvec <- c(0.1, 3)
-tsallis_se <- calculate_diversity(readcounts, genes, method = "tsallis", q = qvec, norm = TRUE)
+tsallis_se <- calculate_diversity(readcounts, genes, method = "tsallis", 
+                                  q = qvec, norm = TRUE)
 tsallis_df <- as.data.frame(assay(tsallis_se))
 tsallis_df$Gene <- rowData(tsallis_se)$genes
 
 # Reshape to long format and separate sample and q value, suitable for ggplot2
-tsallis_long <- tidyr::pivot_longer(tsallis_df, -Gene, names_to = "sample_q", values_to = "tsallis")
-tsallis_long <- tidyr::separate(tsallis_long, sample_q, into = c("sample", "q"), sep = "_q=")
+tsallis_long <- tidyr::pivot_longer(tsallis_df, -Gene, names_to = "sample_q", 
+                                    values_to = "tsallis")
+tsallis_long <- tidyr::separate(tsallis_long, sample_q, into = c("sample", "q"), 
+                                sep = "_q=")
 tsallis_long$q <- as.numeric(tsallis_long$q)
 tsallis_qvec_long <- dplyr::filter(tsallis_long, !is.na(tsallis))
 # Extract group from sample name (assuming format Sample_Group)
@@ -512,7 +519,8 @@ ggplot(tsallis_qvec_long, aes(x = q, y = tsallis, fill = group)) +
   geom_boxplot(width = 0.2, position = position_dodge(width = 0.8), outlier.shape = NA) +
   theme_minimal() +
   theme(plot.title = element_text(hjust = 0.5)) +
-  labs(title = "Tsallis entropy by q and group", x = "q value", y = "Tsallis entropy", fill = "Group")
+  labs(title = "Tsallis entropy by q and group", x = "q value", 
+       y = "Tsallis entropy", fill = "Group")
 ```
 
 An alternative visualization is to plot the density distributions of Tsallis,
@@ -543,7 +551,8 @@ q_values <- seq(0.5, 1.5, by = 0.01)
 get_group_stats_iqr <- function(q) {
   tsallis_df <- as.data.frame(mapply(
     function(sample_col) {
-      tapply(readcounts[, sample_col], genes, calculate_tsallis_entropy, q = q, norm = TRUE)
+      tapply(readcounts[, sample_col], genes, calculate_tsallis_entropy, 
+             q = q, norm = TRUE)
     },
     sample_col = seq_len(ncol(readcounts))
   ))
@@ -551,7 +560,8 @@ get_group_stats_iqr <- function(q) {
   colnames(tsallis_df) <- colnames(readcounts)
   tsallis_df$Gene <- rownames(tsallis_df)
   
-  tsallis_long <- tidyr::pivot_longer(tsallis_df, -Gene, names_to = "sample", values_to = "tsallis") %>%
+  tsallis_long <- tidyr::pivot_longer(tsallis_df, -Gene, names_to = "sample", 
+                                      values_to = "tsallis") %>%
     mutate(group = ifelse(grepl("_N$", sample), "Normal", "Tumor"))
     
   tsallis_long %>%
@@ -567,11 +577,13 @@ stats_df <- bind_rows(lapply(q_values, get_group_stats_iqr))
 # Plot the results
 ggplot(stats_df, aes(x = q, y = median, color = group, fill = group)) +
   geom_line(linewidth = 1) +
-  geom_ribbon(aes(ymin = median - IQR/2, ymax = median + IQR/2), alpha = 0.2, color = NA) +
+  geom_ribbon(aes(ymin = median - IQR/2, ymax = median + IQR/2), alpha = 0.2, 
+              color = NA) +
     theme_minimal() +
     theme(plot.title = element_text(hjust = 0.5)) +
     labs(title = "Median ± IQR of Tsallis entropy by group",
-      x = "q value", y = "Median Tsallis entropy", color = "Group", fill = "Group")
+      x = "q value", y = "Median Tsallis entropy", color = "Group", 
+      fill = "Group")
 
 ```
 

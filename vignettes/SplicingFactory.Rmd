@@ -1,6 +1,6 @@
 ---
 title: "SplicingFactory"
-author: "Péter Szikora, Tamás Pór,Gallardo Cristóbal, Endre Sebestyén"
+author: "Péter Szikora, Tamás Pór, Gallardo Cristóbal, Endre Sebestyén"
 date: "`r Sys.Date()`"
 abstract: >
   SplicingFactory is an R package for the analysis of alternative splicing

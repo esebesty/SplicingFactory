@@ -435,6 +435,13 @@ calculating Tsallis entropy for a range of $q$ values, you can visualize
 how transcript diversity changes as $q$ varies, and compare patterns between 
 biological groups (e.g., Normal vs Tumor).
 
+Selecting $q$ values such as 0.1 and 2 provides insight into how transcript 
+diversity is influenced by isoform abundance. A low $q$ value (e.g., 0.01) 
+makes the entropy measure highly sensitive to rare isoforms, highlighting 
+diversity contributed by low-abundance transcripts. In contrast, a higher 
+$q$ value (e.g., 1) emphasizes the most abundant isoforms, down-weighting the 
+contribution of rare ones. 
+
 We can model Tsallis entropy as a function of $q$ and group using linear 
 regression. This approach allows you to assess whether the relationship between 
 entropy and $q$ differs between groups, and to test for interaction effects.
@@ -443,8 +450,21 @@ Below is an example of how to fit a linear model for each gene, modeling Tsallis
 entropy as a function of $q$, group, and their interaction:
 
 ```{r tsallis-lm-q-continuous, message=FALSE}
+
+# Filter isoforms: keep those expressed (>1 count) in at least 2 samples
+isoform_keep <- rowSums(readcounts > 1) >= 2
+readcounts <- readcounts[isoform_keep, ]
+genes <- genes[isoform_keep]
+
+# Filter genes: keep genes with at least 2 isoforms after isoform filtering
+gene_table <- table(genes)
+multi_isoform_genes <- names(gene_table[gene_table > 1])
+gene_keep <- genes %in% multi_isoform_genes
+readcounts <- readcounts[gene_keep, ]
+genes <- genes[gene_keep]
+
 # Prepare long-format data for all genes
-qvec <- seq(0.1, 3, by = 0.01)
+qvec <- seq(0.01, 1, by = 0.01)
 tsallis_se <- calculate_diversity(readcounts, genes, method = "tsallis", 
                                   q = qvec, norm = TRUE)
 tsallis_mat <- assay(tsallis_se) # genes x (samples_q)
@@ -487,18 +507,13 @@ and $q$ is significantly different between groups, providing a more nuanced view
 splicing diversity changes. 
 
 Now we will create a violin/boxplot to visualize the distribution of Tsallis 
-entropy values. Selecting $q$ values such as 0.1 and 3 for the Tsallis entropy 
-violin plot provides insight into how transcript diversity is influenced by 
-isoform abundance. A low $q$ value (e.g., 0.1) makes the entropy measure highly 
-sensitive to rare isoforms, highlighting diversity contributed by low-abundance 
-transcripts. In contrast, a higher $q$ value (e.g., 3) emphasizes the most 
-abundant isoforms, down-weighting the contribution of rare ones. 
+entropy values. 
 
 ```{r tsallis-violin-multq}
 
 
 # Calculate Tsallis entropy for two q values
-qvec <- c(0.1, 3)
+qvec <- c(0.01, 1)
 tsallis_se <- calculate_diversity(readcounts, genes, method = "tsallis", 
                                   q = qvec, norm = TRUE)
 tsallis_df <- as.data.frame(assay(tsallis_se))
@@ -545,7 +560,7 @@ tendency and variability, which is especially useful in the presence of outliers
 
 ```{r tsallis-q-curve-mean-sd, message=FALSE}
 # Rango de valores q
-q_values <- seq(0.5, 1.5, by = 0.01)
+q_values <- seq(0.01, 1, by = 0.01)
 
 # Function to calculate group statistics using median and IQR
 get_group_stats_iqr <- function(q) {

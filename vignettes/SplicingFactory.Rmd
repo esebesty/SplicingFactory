@@ -385,10 +385,11 @@ axis. Dots are colored red if the adjusted p-value is smaller than 0.05. It is
 recommended to filter for an absolute mean difference larger than 0.1 besides
 the adjusted p-value.
 
-The normalized naive, Laplace, and Tsallis entropy, the Gini index, and the Simpson index
+The normalized naive, Laplace, Tsallis entropy, Gini index, and Simpson index
 are bounded in [0, 1], and we recommend using the mean or median difference when
-filtering for biologically meaningful changes. The non-normalized naive, Laplace, and Tsallis entropy
-are not bounded in [0, 1], and the log2 fold change might give more useful results.
+filtering for biologically meaningful changes. The non-normalized naive, 
+Laplace, and Tsallis entropy are not bounded in [0, 1], and the log2 fold 
+change might give more useful results.
 
 ```{r}
 entropy_significance$label <- apply(entropy_significance[, c(4, 7)], 1,
@@ -435,19 +436,18 @@ calculating Tsallis entropy for a range of $q$ values, you can visualize
 how transcript diversity changes as $q$ varies, and compare patterns between 
 biological groups (e.g., Normal vs Tumor).
 
-Selecting $q$ values such as 0.1 and 2 provides insight into how transcript 
-diversity is influenced by isoform abundance. A low $q$ value (e.g., 0.01) 
-makes the entropy measure highly sensitive to rare isoforms, highlighting 
-diversity contributed by low-abundance transcripts. In contrast, a higher 
-$q$ value (e.g., 1) emphasizes the most abundant isoforms, down-weighting the 
-contribution of rare ones. 
+Selecting $q$ values such as 0.01 and 2 provides insight into how transcript 
+diversity is influenced by isoform abundance. A low $q$ value makes the entropy 
+measure highly sensitive to rare isoforms, highlighting diversity contributed 
+by low-abundance transcripts. In contrast, a higher $q$ value emphasizes the 
+most abundant isoforms, down-weighting the contribution of rare ones. 
 
 We can model Tsallis entropy as a function of $q$ and group using linear 
 regression. This approach allows you to assess whether the relationship between 
 entropy and $q$ differs between groups, and to test for interaction effects.
 
-Below is an example of how to fit a linear model for each gene, modeling Tsallis 
-entropy as a function of $q$, group, and their interaction:
+Below is an example of how to fit a linear model for each gene, modeling 
+Tsallis entropy as a function of $q$, group, and their interaction:
 
 ```{r tsallis-lm-q-continuous, message=FALSE}
 
@@ -464,7 +464,7 @@ readcounts <- readcounts[gene_keep, ]
 genes <- genes[gene_keep]
 
 # Prepare long-format data for all genes
-qvec <- seq(0.01, 1, by = 0.01)
+qvec <- seq(0.01, 2, by = 0.01)
 tsallis_se <- calculate_diversity(readcounts, genes, method = "tsallis", 
                                   q = qvec, norm = TRUE)
 tsallis_mat <- assay(tsallis_se) # genes x (samples_q)
@@ -483,7 +483,8 @@ for (gene1 in rownames(tsallis_mat)) {
     fit <- lm(entropy ~ q * group, data = df)
     # Extract p-value for interaction term
     p_interaction <- summary(fit)$coefficients["q:groupTumor", "Pr(>|t|)"]
-    all_lm_results[[gene1]] <- data.frame(gene = gene1, p_interaction = p_interaction)
+    all_lm_results[[gene1]] <- data.frame(gene = gene1, 
+                                          p_interaction = p_interaction)
   }
 }
 if (length(all_lm_results) > 0) {
@@ -502,9 +503,9 @@ if (length(all_lm_results) > 0) {
 }
 ```
 
-This approach allows you to identify genes where the relationship between Tsallis entropy 
-and $q$ is significantly different between groups, providing a more nuanced view of 
-splicing diversity changes. 
+This approach allows you to identify genes where the relationship between 
+Tsallis entropy and $q$ is significantly different between groups, providing a 
+more nuanced view of splicing diversity changes. 
 
 Now we will create a violin/boxplot to visualize the distribution of Tsallis 
 entropy values. 
@@ -513,7 +514,7 @@ entropy values.
 
 
 # Calculate Tsallis entropy for two q values
-qvec <- c(0.01, 1)
+qvec <- c(0.01, 2)
 tsallis_se <- calculate_diversity(readcounts, genes, method = "tsallis", 
                                   q = qvec, norm = TRUE)
 tsallis_df <- as.data.frame(assay(tsallis_se))
@@ -531,7 +532,8 @@ tsallis_qvec_long$group <- sub(".*_", "", tsallis_qvec_long$sample)
 tsallis_qvec_long$q <- as.factor(tsallis_qvec_long$q)
 ggplot(tsallis_qvec_long, aes(x = q, y = tsallis, fill = group)) +
   geom_violin(alpha = 0.5, position = position_dodge(width = 0.8)) +
-  geom_boxplot(width = 0.2, position = position_dodge(width = 0.8), outlier.shape = NA) +
+  geom_boxplot(width = 0.2, position = position_dodge(width = 0.8), 
+               outlier.shape = NA) +
   theme_minimal() +
   theme(plot.title = element_text(hjust = 0.5)) +
   labs(title = "Tsallis entropy by q and group", x = "q value", 
@@ -560,7 +562,7 @@ tendency and variability, which is especially useful in the presence of outliers
 
 ```{r tsallis-q-curve-mean-sd, message=FALSE}
 # Rango de valores q
-q_values <- seq(0.01, 1, by = 0.01)
+q_values <- seq(0.01, 2, by = 0.01)
 
 # Function to calculate group statistics using median and IQR
 get_group_stats_iqr <- function(q) {
@@ -597,7 +599,7 @@ ggplot(stats_df, aes(x = q, y = median, color = group, fill = group)) +
     theme_minimal() +
     theme(plot.title = element_text(hjust = 0.5)) +
     labs(title = "Median ± IQR of Tsallis entropy by group",
-      x = "q value", y = "Median Tsallis entropy", color = "Group", 
+      x = "q value", y = "Tsallis entropy", color = "Group", 
       fill = "Group")
 
 ```

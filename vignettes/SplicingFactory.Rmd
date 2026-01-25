@@ -451,11 +451,6 @@ Tsallis entropy as a function of $q$, group, and their interaction:
 
 ```{r tsallis-lm-q-continuous, message=FALSE}
 
-# Filter isoforms: keep those expressed (>1 count) in at least 2 samples
-isoform_keep <- rowSums(readcounts > 1) >= 2
-readcounts <- readcounts[isoform_keep, ]
-genes <- genes[isoform_keep]
-
 # Filter genes: keep genes with at least 2 isoforms after isoform filtering
 gene_table <- table(genes)
 multi_isoform_genes <- names(gene_table[gene_table > 1])

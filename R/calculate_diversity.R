@@ -200,10 +200,12 @@ calculate_diversity <- function(x, genes = NULL, method = "laplace", norm = TRUE
   result_metadata <- list(method = method, norm = norm)
   if (method == "tsallis") result_metadata$q <- q
 
-  SummarizedExperiment(
+  result <- SummarizedExperiment(
     assays = list(diversity = result_assay),
     rowData = result_rowData,
     colData = result_colData,
     metadata = result_metadata
   )
+
+  return(result)
 }

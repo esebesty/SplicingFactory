@@ -22,8 +22,10 @@
 #' @param verbose If \code{TRUE}, the function will print additional diagnostic
 #'    messages, besides the warnings and errors.
 #' @param q Tsallis entropy parameter (q ≥ 0). Only used if method = "tsallis".
-#'   Default is 2. Must be a single scalar value. q = 0 gives species richness,
-#'   q → 1 gives Shannon entropy, q ≠ 1 gives Tsallis entropy.
+#'   Default is 2. Must be a single scalar value.
+#'   Tsallis entropy is a generalization that encompasses multiple diversity measures:
+#'   q = 0 gives species richness, q = 1 gives Shannon entropy, and other q values
+#'   give related diversity indices (e.g., Simpson index at q=2).
 #' @return Gene-level splicing diversity values in a \code{SummarizedExperiment}
 #'    object.
 #' @import methods

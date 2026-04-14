@@ -37,19 +37,30 @@ test_that("Basic input error handling is working.", {
     }
 })
 
-test_that("calculate_diversity supports q as a vector and returns correct metadata", {
+test_that("calculate_diversity rejects vector q with clear error", {
     x <- matrix(c(0, 0, 5, 4, 1, 2, 2, 2, 2, 2), ncol = 2)
     colnames(x) <- c("Sample1", "Sample2")
     gene <- c("Gene1", "Gene1", "Gene1", "Gene1", "Gene1")
     qvec <- c(1.1, 1.5, 2)
-    result <- calculate_diversity(x, gene, method = "tsallis", norm = TRUE, q = qvec)
-    # Assay should have columns for each q and sample
-    assay_names <- colnames(assay(result))
-    for (qi in qvec) {
-        expect_true(any(grepl(paste0("q=", qi), assay_names)))
-    }
-    # Metadata should contain the q vector
-    expect_equal(S4Vectors::metadata(result)$q, qvec)
+    # Vector q should be rejected with clear error message
+    expect_error(
+        calculate_diversity(x, gene, method = "tsallis", norm = TRUE, q = qvec),
+        "q must be a single scalar value"
+    )
+})
+
+test_that("calculate_diversity supports scalar q and returns correct metadata", {
+    x <- matrix(c(0, 0, 5, 4, 1, 2, 2, 2, 2, 2), ncol = 2)
+    colnames(x) <- c("Sample1", "Sample2")
+    gene <- c("Gene1", "Gene1", "Gene1", "Gene1", "Gene1")
+    q <- 2  # Scalar q value (required for statistical testing)
+    result <- calculate_diversity(x, gene, method = "tsallis", norm = TRUE, q = q)
+    
+    # Assay should have columns for each sample (no q replication since scalar)
+    expect_equal(ncol(result), 2)  # Two samples
+    
+    # Metadata should contain the scalar q value
+    expect_equal(S4Vectors::metadata(result)$q, q)
 })
 test_that("calculate_diversity passes q parameter for Tsallis entropy", {
     x <- matrix(c(0, 0, 5, 4, 1, 2, 2, 2, 2, 2), ncol = 2)

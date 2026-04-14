@@ -13,7 +13,9 @@
 #'   of transcripts for each gene. The normalized entropy values are always
 #'   between 0 and 1. If \code{FALSE}, genes cannot be compared to each other,
 #'   due to possibly different maximum entropy values.
-#' @param q Tsallis entropy parameter (q > 0). Only used if method = "tsallis". Default is 2. If q = 1, the function returns the Shannon entropy.
+#' @param q Tsallis entropy parameter (q ≥ 0). Only used if method = "tsallis".
+#'   Default is 2. Must be a single scalar value. q = 0 gives species richness,
+#'   q → 1 gives Shannon entropy, q ≠ 1 gives Tsallis entropy.
 #' @param verbose If \code{TRUE}, the function will print additional diagnostic
 #'   messages, besides the warnings and errors.
 #' @return Gene-level splicing diversity values in a \code{data.frame}, where
@@ -36,20 +38,18 @@ calculate_method <- function(x, genes, method, norm = TRUE, verbose = FALSE, q =
     }
 
     if (method == "tsallis") {
-        # It is not possible to use aggregate here, because it expect to return
-        # a single value per group, but calculate_tsallis_entropy can return
-        # multiple values (if length(q) > 1)
+        # Note: q must be a scalar value (required for statistical testing)
+        # calculate_tsallis_entropy enforces length(q) == 1
         gene_levels <- unique(genes)
-        coln <- as.vector(outer(colnames(x), q, function(s, qq) paste0(s, "_q=", qq)))
+        coln <- colnames(x)
         rown <- gene_levels
         tsallis_row <- function(gene) {
             idx <- which(genes == gene)
-            unlist(lapply(seq_len(ncol(x)), function(j) {
-                v <- calculate_tsallis_entropy(x[idx, j], q = q, norm = norm)
-                if (length(v) == length(q) && all(is.finite(v) | is.na(v))) v else setNames(rep(NA_real_, length(q)), paste0("q=", q))
-            }))
+            sapply(seq_len(ncol(x)), function(j) {
+                calculate_tsallis_entropy(x[idx, j], q = q, norm = norm)
+            })
         }
-        result_mat <- t(vapply(gene_levels, tsallis_row, FUN.VALUE = setNames(numeric(length(coln)), coln)))
+        result_mat <- t(vapply(gene_levels, tsallis_row, FUN.VALUE = numeric(ncol(x))))
         colnames(result_mat) <- coln
         rownames(result_mat) <- rown
         out_df <- data.frame(Gene = rown, result_mat, check.names = FALSE)

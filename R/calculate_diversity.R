@@ -21,7 +21,9 @@
 #'    to use for diversity calculations.
 #' @param verbose If \code{TRUE}, the function will print additional diagnostic
 #'    messages, besides the warnings and errors.
-#' @param q Tsallis entropy parameter (q > 0). Only used if method = "tsallis". Default is 2. If q = 1, the function returns the Shannon entropy.
+#' @param q Tsallis entropy parameter (q ≥ 0). Only used if method = "tsallis".
+#'   Default is 2. Must be a single scalar value. q = 0 gives species richness,
+#'   q → 1 gives Shannon entropy, q ≠ 1 gives Tsallis entropy.
 #' @return Gene-level splicing diversity values in a \code{SummarizedExperiment}
 #'    object.
 #' @import methods
@@ -36,7 +38,7 @@
 #' diversity values for each gene in each sample. These diversity values can be
 #' used to investigate the dominance of a specific transcript for a gene,
 #' the diversity of transcripts in a gene, and analyze changes in diversity.
-#'
+#' 
 #' There are a number of diversity values implemented in the package. These
 #' include the following:
 #' \itemize{
@@ -45,8 +47,9 @@
 #'     values mean a more diverse set of transcripts for a gene.
 #'   \item Laplace entropy: Shannon entropy where the transcript frequencies are
 #'     replaced by a Bayesian estimate, using Laplace's prior.
-#'   \item Tsallis entropy: A generalization of Shannon entropy, parameterized by q (q > 0). 
-#'     For q → 1, Tsallis entropy converges to Shannon entropy. The default q is 2.
+#'   \item Tsallis entropy: A generalization of Shannon entropy, parameterized by q (q ≥ 0). 
+#'     q = 0 gives species richness, q → 1 gives Shannon entropy, q ≠ 1 gives Tsallis entropy.
+#'     The default q is 2.
 #'   \item Gini index: a measure of statistical dispersion originally used in
 #'     economy. This measurement ranges from 0 (complete equality) to 1
 #'     (complete inequality). A value of 1 (complete inequality) means a single
@@ -177,25 +180,12 @@ calculate_diversity <- function(x, genes = NULL, method = "laplace", norm = TRUE
   result_assay <- result[, -1, drop = FALSE]
   result_rowData <- data.frame(genes = result[, 1], row.names = result[, 1])
 
-  if (method == "tsallis" && length(q) > 1) {
-    col_split <- do.call(rbind, strsplit(colnames(result)[-1], "_q="))
-    col_ids <- paste0(col_split[,1], "_q=", col_split[,2])
-    row_ids <- as.character(result[, 1])
-    result_colData <- data.frame(
-      samples = as.character(col_split[, 1]),
-      q = as.numeric(col_split[, 2]),
-      row.names = col_ids,
-      stringsAsFactors = FALSE
-    )
-    colnames(result_assay) <- col_ids
-    rownames(result_assay) <- row_ids
-  } else {
-    col_ids <- colnames(x)
-    row_ids <- as.character(result[, 1])
-    result_colData <- data.frame(samples = col_ids, row.names = col_ids)
-    colnames(result_assay) <- col_ids
-    rownames(result_assay) <- row_ids
-  }
+  # For Tsallis with scalar q, columns correspond to samples only
+  col_ids <- colnames(x)
+  row_ids <- as.character(result[, 1])
+  result_colData <- data.frame(samples = col_ids, row.names = col_ids)
+  colnames(result_assay) <- col_ids
+  rownames(result_assay) <- row_ids
 
   result_metadata <- list(method = method, norm = norm)
   if (method == "tsallis") result_metadata$q <- q

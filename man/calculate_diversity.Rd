@@ -11,7 +11,8 @@ calculate_diversity(
   norm = TRUE,
   tpm = FALSE,
   assayno = 1,
-  verbose = FALSE
+  verbose = FALSE,
+  q = 2
 )
 }
 \arguments{
@@ -23,8 +24,8 @@ input dataset with transcript-level expression values. The values in
 \code{x} are grouped into genes based on this vector.}
 
 \item{method}{Method to use for splicing diversity calculation, including
-naive entropy (\code{naive}), Laplace entropy (\code{laplace}), Gini index
-(\code{gini}), Simpson index (\code{simpson}) and inverse Simpson index
+naive entropy (\code{naive}), Laplace entropy (\code{laplace}), Tsallis entropy (\code{tsallis}),
+Gini index (\code{gini}), Simpson index (\code{simpson}) and inverse Simpson index
 (\code{invsimpson}). The default method is Laplace entropy.}
 
 \item{norm}{If \code{TRUE}, the entropy values are normalized to the number
@@ -42,6 +43,8 @@ to use for diversity calculations.}
 
 \item{verbose}{If \code{TRUE}, the function will print additional diagnostic
 messages, besides the warnings and errors.}
+
+\item{q}{Tsallis entropy parameter (q > 0). Only used if method = "tsallis". Default is 2. If q = 1, the function returns the Shannon entropy.}
 }
 \value{
 Gene-level splicing diversity values in a \code{SummarizedExperiment}
@@ -69,6 +72,8 @@ include the following:
     values mean a more diverse set of transcripts for a gene.
   \item Laplace entropy: Shannon entropy where the transcript frequencies are
     replaced by a Bayesian estimate, using Laplace's prior.
+  \item Tsallis entropy: A generalization of Shannon entropy, parameterized by q (q > 0). 
+    For q → 1, Tsallis entropy converges to Shannon entropy. The default q is 2.
   \item Gini index: a measure of statistical dispersion originally used in
     economy. This measurement ranges from 0 (complete equality) to 1
     (complete inequality). A value of 1 (complete inequality) means a single

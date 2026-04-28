@@ -103,3 +103,84 @@ test_that("Calculate difference output is correct.", {
     expect_equal(mean(result$Pathogenic_mean), 0.65, tolerance = 0.001, scale = 1)
     expect_equal(mean(result$Healthy_mean), 0.25, tolerance = 0.001, scale = 1)
 })
+
+test_that("Tsallis entropy works with calculate_difference and Wilcoxon test.", {
+
+    # Create simple diversity data from tsallis entropy
+    diversity <- data.frame(
+        Genes = letters[1:5],
+        S1 = c(0.3, 0.4, 0.2, 0.5, 0.35),
+        S2 = c(0.32, 0.42, 0.22, 0.48, 0.33),
+        S3 = c(0.31, 0.41, 0.21, 0.49, 0.34),
+        S4 = c(0.33, 0.43, 0.23, 0.47, 0.36),
+        S5 = c(0.6, 0.7, 0.5, 0.8, 0.65),
+        S6 = c(0.62, 0.72, 0.52, 0.78, 0.67),
+        S7 = c(0.61, 0.71, 0.51, 0.79, 0.66),
+        S8 = c(0.63, 0.73, 0.53, 0.77, 0.68)
+    )
+    samples <- c(rep("Healthy", 4), rep("Pathogenic", 4))
+    control <- "Healthy"
+
+    result <- calculate_difference(diversity, samples, control, method = "mean", test = "wilcoxon")
+
+    expect_true(is.data.frame(result))
+    expect_true(all(c("genes", "Healthy_mean", "Pathogenic_mean", "log2_fold_change", "raw_p_values", "adjusted_p_values") %in% colnames(result)))
+    expect_equal(nrow(result), 5)
+    # Pathogenic should have higher diversity values on average
+    expect_gt(mean(result$Pathogenic_mean), mean(result$Healthy_mean))
+    # P-values should be numeric and non-negative
+    expect_true(all(result$raw_p_values >= 0 & result$raw_p_values <= 1, na.rm = TRUE))
+})
+
+test_that("Tsallis entropy works with calculate_difference and median method.", {
+
+    diversity <- data.frame(
+        Genes = letters[1:10],
+        S1 = runif(10, 0.2, 0.4),
+        S2 = runif(10, 0.2, 0.4),
+        S3 = runif(10, 0.2, 0.4),
+        S4 = runif(10, 0.2, 0.4),
+        S5 = runif(10, 0.6, 0.8),
+        S6 = runif(10, 0.6, 0.8),
+        S7 = runif(10, 0.6, 0.8),
+        S8 = runif(10, 0.6, 0.8)
+    )
+    samples <- c(rep("Control", 4), rep("Treatment", 4))
+    control <- "Control"
+
+    result <- calculate_difference(diversity, samples, control, method = "median", test = "wilcoxon")
+
+    expect_true(is.data.frame(result))
+    expect_equal(nrow(result), 10)
+    expect_true(all(c("genes", "Control_median", "Treatment_median") %in% colnames(result)))
+    expect_true(all(!is.na(result$raw_p_values)))
+})
+
+test_that("Tsallis entropy works with calculate_difference and label shuffling.", {
+
+    # Use larger sample size (5+5=10) to avoid low sample size warning (requires at least 8 total)
+    diversity <- data.frame(
+        Genes = letters[1:8],
+        S1 = c(0.25, 0.35, 0.45, 0.55, 0.30, 0.40, 0.50, 0.60),
+        S2 = c(0.28, 0.38, 0.48, 0.58, 0.32, 0.42, 0.52, 0.62),
+        S3 = c(0.27, 0.37, 0.47, 0.57, 0.31, 0.41, 0.51, 0.61),
+        S4 = c(0.29, 0.39, 0.49, 0.59, 0.33, 0.43, 0.53, 0.63),
+        S5 = c(0.70, 0.80, 0.90, 1.0, 0.75, 0.85, 0.95, 1.0),
+        S6 = c(0.72, 0.82, 0.92, 0.98, 0.77, 0.87, 0.97, 0.99),
+        S7 = c(0.75, 0.85, 0.95, 0.96, 0.80, 0.90, 1.0, 1.0),
+        S8 = c(0.68, 0.78, 0.88, 0.99, 0.73, 0.83, 0.93, 1.0),
+        S9 = c(0.26, 0.36, 0.46, 0.56, 0.31, 0.41, 0.51, 0.61),
+        S10 = c(0.71, 0.81, 0.91, 0.99, 0.76, 0.86, 0.96, 1.0)
+    )
+    samples <- c(rep("WT", 5), rep("Mutant", 5))
+    control <- "WT"
+
+    result <- calculate_difference(
+        diversity, samples, control,
+        method = "mean", test = "shuffle", randomizations = 50
+    )
+
+    expect_true(is.data.frame(result))
+    expect_true(all(c("genes", "WT_mean", "Mutant_mean", "log2_fold_change", "raw_p_values", "adjusted_p_values") %in% colnames(result)))
+    expect_equal(nrow(result), 8)
+})

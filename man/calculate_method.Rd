@@ -4,7 +4,7 @@
 \alias{calculate_method}
 \title{Calculate diversity values for a matrix of transcripts.}
 \usage{
-calculate_method(x, genes, method, norm = TRUE, verbose = FALSE)
+calculate_method(x, genes, method, norm = TRUE, verbose = FALSE, q = 2)
 }
 \arguments{
 \item{x}{An input \code{matrix}, or \code{data.frame} containing
@@ -15,8 +15,8 @@ input dataset with transcript-level expression values. The values in
 \code{x} are grouped into genes based on this vector.}
 
 \item{method}{Method to use for splicing diversity calculation, including
-naive entropy (\code{naive}), Laplace entropy (\code{laplace}), Gini index
-(\code{gini}), Simpson index (\code{simpson}) and inverse Simpson index
+naive entropy (\code{naive}), Laplace entropy (\code{laplace}), Tsallis entropy (\code{tsallis}),
+Gini index (\code{gini}), Simpson index (\code{simpson}) and inverse Simpson index
 (\code{invsimpson}). The default method is Laplace entropy.}
 
 \item{norm}{If \code{TRUE}, the entropy values are normalized to the number
@@ -26,6 +26,8 @@ due to possibly different maximum entropy values.}
 
 \item{verbose}{If \code{TRUE}, the function will print additional diagnostic
 messages, besides the warnings and errors.}
+
+\item{q}{Tsallis entropy parameter (q > 0). Only used if method = "tsallis". Default is 2. If q = 1, the function returns the Shannon entropy.}
 }
 \value{
 Gene-level splicing diversity values in a \code{data.frame}, where
